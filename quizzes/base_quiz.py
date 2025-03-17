@@ -1,7 +1,7 @@
 """
 Base quiz class that provides common functionality for all quizzes.
 """
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar, QGridLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar, QGridLayout, QSizePolicy
 from PySide6.QtCore import Qt
 import random
 from .styles import (
@@ -39,7 +39,7 @@ class BaseQuiz(QWidget):
         self.progress_layout.setContentsMargins(5, 5, 5, 5)  # Reduce internal margins
         self.progress_container.setLayout(self.progress_layout)
         
-        self.progress_label = QLabel(f"Question 0/{self.total_questions}")
+        self.progress_label = QLabel(f"Pytanie 0 z {self.total_questions}")
         self.progress_layout.addWidget(self.progress_label)
         
         self.progress_bar = QProgressBar()
@@ -47,20 +47,24 @@ class BaseQuiz(QWidget):
         self.progress_bar.setValue(0)
         self.progress_layout.addWidget(self.progress_bar)
         
-        self.score_label = QLabel("Score: 0%")
+        self.score_label = QLabel("Punkty: 0%")
         self.progress_layout.addWidget(self.score_label)
         
         self.layout.addWidget(self.progress_container)
         
-        # Question label
+        # Question label (with stretch to adapt to window height)
         self.question_label = QLabel()
         self.question_label.setStyleSheet(QUESTION_LABEL_STYLE)
         self.question_label.setAlignment(Qt.AlignCenter)
-        self.question_label.setFixedHeight(80)  # Fixed height
+        self.question_label.setMinimumHeight(60)  # Minimum height instead of fixed
+        # Allow question label to expand vertically when window is resized
+        self.question_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.layout.addWidget(self.question_label)
         
         # Create a single row widget with 3 columns for answers, feedback, and next button
         self.interaction_widget = QWidget()
+        # Fix the height of the interaction widget
+        self.interaction_widget.setFixedHeight(140)  # Fixed height for the entire row
         self.interaction_layout = QHBoxLayout()
         self.interaction_layout.setSpacing(DEFAULT_SPACING)
         self.interaction_widget.setLayout(self.interaction_layout)
@@ -83,6 +87,7 @@ class BaseQuiz(QWidget):
         self.feedback_label.setStyleSheet(FEEDBACK_LABEL_STYLE)
         self.feedback_label.setAlignment(Qt.AlignCenter)
         self.feedback_label.setWordWrap(True)  # Allow text wrapping
+        self.feedback_label.setMaximumHeight(100)  # Limit the maximum height
         self.feedback_layout.addWidget(self.feedback_label)
         self.interaction_layout.addWidget(self.feedback_container, 2)  # 2 parts for feedback
         
@@ -110,7 +115,7 @@ class BaseQuiz(QWidget):
         self.results_layout = QVBoxLayout()
         self.results_widget.setLayout(self.results_layout)
         
-        self.results_title = QLabel("Quiz Completed!")
+        self.results_title = QLabel("Koniec quizu!")
         self.results_title.setStyleSheet("font-size: 24px; font-weight: bold;")
         self.results_title.setAlignment(Qt.AlignCenter)
         self.results_layout.addWidget(self.results_title)
@@ -130,18 +135,9 @@ class BaseQuiz(QWidget):
         self.restart_button.setMinimumSize(80, 80)
         self.restart_button.setStyleSheet(NEXT_BUTTON_STYLE)
         self.restart_button.setFont(QFont("Arial", 20))
-        self.restart_button.setToolTip("Start New Quiz")
+        self.restart_button.setToolTip("nowy quiz")
         self.restart_button.clicked.connect(self.restart_quiz)
         self.results_buttons_layout.addWidget(self.restart_button)
-        
-        # Menu button with icon
-        self.menu_button = QPushButton("🏠")  # Home emoji
-        self.menu_button.setMinimumSize(80, 80)
-        self.menu_button.setStyleSheet(RETURN_BUTTON_STYLE)
-        self.menu_button.setFont(QFont("Arial", 20))
-        self.menu_button.setToolTip("Return to Menu")
-        self.menu_button.clicked.connect(self.return_to_menu)
-        self.results_buttons_layout.addWidget(self.menu_button)
         
         self.results_layout.addWidget(self.results_buttons, alignment=Qt.AlignCenter)
         
@@ -284,7 +280,7 @@ class BaseQuiz(QWidget):
             col = i % 2   # Modulo for column
             
             button = QPushButton(str(option))
-            button.setFixedSize(80, 50)  # Smaller fixed size
+            button.setFixedSize(70, 40)  # Smaller fixed size to fit in the fixed-height row
             button.setStyleSheet(ANSWER_BUTTON_STYLE)
             button.clicked.connect(lambda checked, ans=option: self.check_answer(ans))
             self.answers_layout.addWidget(button, row, col)

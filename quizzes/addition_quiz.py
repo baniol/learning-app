@@ -2,7 +2,7 @@
 Addition quiz implementation with visual aids.
 """
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
 import random
 from .base_quiz import BaseQuiz
 from .components import NavigationBar, VisualAidWidget
@@ -24,7 +24,10 @@ class AdditionQuiz(BaseQuiz):
         )
         self.layout.insertWidget(0, self.nav_bar)
         
+        # Visual aid container setup
         self.visual_aid_container = QWidget()
+        # Initialize with Preferred when visible (first time setup)
+        self.visual_aid_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.visual_aid_layout = QVBoxLayout()
         self.visual_aid_layout.setContentsMargins(0, 0, 0, 0)
         self.visual_aid_container.setLayout(self.visual_aid_layout)
@@ -35,6 +38,9 @@ class AdditionQuiz(BaseQuiz):
         
         # Add container to main layout
         self.layout.insertWidget(1, self.visual_aid_container)
+        
+        # Ensure initial visibility matches checkbox state
+        self.toggle_visual_aid(self.show_visual_aid_checkbox.isChecked())
     
     def return_to_menu(self):
         """Return to the main menu."""
@@ -42,7 +48,32 @@ class AdditionQuiz(BaseQuiz):
     
     def toggle_visual_aid(self, state):
         """Toggle the visibility of the visual aid."""
-        self.visual_aid.setVisible(self.show_visual_aid_checkbox.isChecked())
+        # Get the current state from the checkbox
+        show_visual_aid = self.show_visual_aid_checkbox.isChecked()
+        
+        # Show or hide the container
+        self.visual_aid_container.setVisible(show_visual_aid)
+        
+        # When making visible, ensure it gets proper size
+        if show_visual_aid:
+            # Update the visual aid container with the proper height but don't set a fixed height
+            # which can cause overlapping issues
+            self.visual_aid_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        else:
+            # When hiding, use Ignored policy to completely remove from layout
+            self.visual_aid_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
+        
+        # Force layout updates
+        self.layout.activate()
+        self.layout.update()
+        
+        # Force layout updates to parent widgets
+        if self.parent():
+            self.parent().layout().activate()
+            self.parent().layout().update()
+            
+        # Request an update to the whole window
+        self.window().update()
     
     def generate_numbers(self):
         """Generate numbers where the sum is 10 or greater."""
@@ -55,17 +86,21 @@ class AdditionQuiz(BaseQuiz):
     def on_new_question(self):
         """Update the visual aid when a new question is generated."""
         # Store current visibility state
-        was_visible = self.visual_aid.isVisible()
+        was_visible = self.show_visual_aid_checkbox.isChecked()
         
         # Remove old visual aid from container
-        self.visual_aid.deleteLater()
+        if hasattr(self, 'visual_aid'):
+            self.visual_aid.setParent(None)
+            self.visual_aid.deleteLater()
         
         # Create new visual aid
         self.visual_aid = VisualAidWidget(self.num1, self.num2)
         
         # Add to container and restore visibility
         self.visual_aid_layout.addWidget(self.visual_aid)
-        self.visual_aid.setVisible(was_visible)
+        
+        # Update visibility based on checkbox state
+        self.toggle_visual_aid(was_visible)
     
     def calculate_answer(self):
         """Calculate the sum of the two numbers."""

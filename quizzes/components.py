@@ -1,7 +1,7 @@
 """
 Reusable UI components for the quiz application.
 """
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QCheckBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QCheckBox, QSizePolicy
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QColor
 from .styles import (
@@ -160,7 +160,10 @@ class VisualAidWidget(QWidget):
     def __init__(self, num1, num2):
         super().__init__()
         self.setStyleSheet(VISUAL_AID_BORDER_STYLE)
-        self.setFixedHeight(VISUAL_AID_HEIGHT)
+        # Set minimum height instead of fixed height to allow more flexible layout
+        self.setMinimumHeight(VISUAL_AID_HEIGHT)
+        # Use a policy that works better with layout changes
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.num1 = num1
         self.num2 = num2
         self.complement_shown = False

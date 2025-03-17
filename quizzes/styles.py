@@ -4,7 +4,7 @@ This module contains all the styles used in the application to make them easy to
 """
 
 # Debug mode - set to True to show borders during development
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 # Window settings
 WINDOW_TITLE = "Math Quiz"
@@ -145,7 +145,7 @@ ANSWERS_LAYOUT_SPACING = 10
 ANSWER_BUTTON_SIZE = (200, 50)  # Minimum width, height
 
 # Fixed height values
-VISUAL_AID_HEIGHT = 200  # Fixed height for visual aid container and widget
+VISUAL_AID_HEIGHT = 190  # Fixed height for visual aid container and widget
 NAV_BAR_HEIGHT = 40  # Fixed height for navigation bar
 
 # Quiz options
