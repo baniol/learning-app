@@ -41,7 +41,7 @@ class BaseQuiz(QWidget):
         self.progress_container.setLayout(self.progress_layout)
         
         # Progress bar with label
-        self.progress_label = QLabel(f"Pytanie 0 z {self.total_questions}")
+        self.progress_label = QLabel(f"Pytanie 0/{self.total_questions}")
         self.progress_layout.addWidget(self.progress_label)
         
         self.progress_bar = QProgressBar()
@@ -127,10 +127,14 @@ class BaseQuiz(QWidget):
         # Results widget (initially hidden)
         self.results_widget = QWidget()
         self.results_layout = QVBoxLayout()
+        self.results_layout.setSpacing(DEFAULT_SPACING * 2)  # Increase spacing for better appearance
         self.results_widget.setLayout(self.results_layout)
         
+        # Add some space at the top to center content vertically
+        self.results_layout.addStretch(1)
+        
         self.results_title = QLabel("Koniec quizu!")
-        self.results_title.setStyleSheet("font-size: 24px; font-weight: bold;")
+        self.results_title.setStyleSheet("font-size: 32px; font-weight: bold;")
         self.results_title.setAlignment(Qt.AlignCenter)
         self.results_layout.addWidget(self.results_title)
         
@@ -142,6 +146,7 @@ class BaseQuiz(QWidget):
         # Button container for results screen
         self.results_buttons = QWidget()
         self.results_buttons_layout = QHBoxLayout()
+        self.results_buttons_layout.setSpacing(DEFAULT_SPACING * 2)  # More space between buttons
         self.results_buttons.setLayout(self.results_buttons_layout)
         
         # Restart button with icon
@@ -149,12 +154,25 @@ class BaseQuiz(QWidget):
         self.restart_button.setMinimumSize(80, 80)
         self.restart_button.setStyleSheet(NEXT_BUTTON_STYLE)
         self.restart_button.setFont(QFont("Arial", 20))
-        self.restart_button.setToolTip("nowy quiz")
+        self.restart_button.setToolTip("Nowy quiz")
         self.restart_button.clicked.connect(self.restart_quiz)
         self.results_buttons_layout.addWidget(self.restart_button)
         
+        # Home button for returning to menu
+        self.menu_button = QPushButton("🏠")  # Home emoji
+        self.menu_button.setMinimumSize(80, 80)
+        self.menu_button.setStyleSheet(RETURN_BUTTON_STYLE)
+        self.menu_button.setFont(QFont("Arial", 20))
+        self.menu_button.setToolTip("Powrót do menu")
+        self.menu_button.clicked.connect(self.return_to_menu)
+        self.results_buttons_layout.addWidget(self.menu_button)
+        
         self.results_layout.addWidget(self.results_buttons, alignment=Qt.AlignCenter)
         
+        # Add some space at the bottom to center content vertically
+        self.results_layout.addStretch(1)
+        
+        # Add the results widget to the main layout (initially hidden)
         self.layout.addWidget(self.results_widget)
         self.results_widget.hide()
         
@@ -182,11 +200,10 @@ class BaseQuiz(QWidget):
         self.progress_label.setText(f"Pytanie 0/{self.total_questions}")
         self.score_indicator.set_score(0, 0)
         
-        # Show quiz UI, hide results
-        self.question_label.show()
-        self.answers_widget.show()
-        self.feedback_label.show()
+        # Hide results, show quiz UI
         self.results_widget.hide()
+        self.question_label.show()
+        self.interaction_widget.show()
         
         # Generate first question
         self.generate_new_question()
@@ -200,7 +217,7 @@ class BaseQuiz(QWidget):
         # Update progress
         self.current_question += 1
         self.progress_bar.setValue(self.current_question)
-        self.progress_label.setText(f"Question {self.current_question}/{self.total_questions}")
+        self.progress_label.setText(f"Pytanie {self.current_question}/{self.total_questions}")
         
         # Check if quiz is complete
         if self.current_question > self.total_questions:
@@ -239,7 +256,7 @@ class BaseQuiz(QWidget):
         score_percent = int((self.correct_answers / self.total_questions) * 100)
         
         # Update results text
-        self.results_score.setText(f"You answered {self.correct_answers} out of {self.total_questions} questions correctly.\nYour score: {score_percent}%")
+        self.results_score.setText(f"Odpowiedziałeś poprawnie na {self.correct_answers} z {self.total_questions} pytań.\nTwój wynik: {score_percent}%")
         
         # Set color based on score
         if score_percent >= 80:
@@ -249,11 +266,9 @@ class BaseQuiz(QWidget):
         else:
             self.results_score.setStyleSheet("font-size: 20px; color: red;")
         
-        # Hide quiz UI elements but maintain their space
-        self.question_label.setText("")
-        self.feedback_label.setText("")
-        self.clear_answer_buttons()
-        self.next_button.hide()
+        # Hide quiz UI elements
+        self.question_label.hide()
+        self.interaction_widget.hide()
         
         # Show results
         self.results_widget.show()

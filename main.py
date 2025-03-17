@@ -91,7 +91,10 @@ class MainWindow(QMainWindow):
     def on_button_click(self, name):
         if name in QUIZ_TYPE_MAP:
             quiz_class = globals()[QUIZ_TYPE_MAP[name]]
-            self.show_quiz(quiz_class(total_questions=DEFAULT_QUIZ_QUESTIONS))
+            self.show_quiz(quiz_class(
+                total_questions=DEFAULT_QUIZ_QUESTIONS,
+                show_questions_control=False
+            ))
         else:
             print(f"{name} clicked")
 

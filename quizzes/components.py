@@ -1,7 +1,7 @@
 """
 Reusable UI components for the quiz application.
 """
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QCheckBox, QSizePolicy
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QCheckBox, QSizePolicy, QSpinBox
 from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPainter, QColor
 from .styles import (
@@ -45,6 +45,31 @@ class NavigationBar(QWidget):
             checkbox.stateChanged.connect(callback)
         self.layout.addWidget(checkbox)
         return checkbox
+        
+    def add_questions_spinbox(self, initial_value=20, min_value=5, max_value=50, callback=None):
+        """Add a spin box to select the number of questions."""
+        container = QWidget()
+        container_layout = QHBoxLayout()
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(5)
+        container.setLayout(container_layout)
+        
+        # Add label
+        label = QLabel("Pytania:")
+        container_layout.addWidget(label)
+        
+        # Add spin box
+        spinbox = QSpinBox()
+        spinbox.setMinimum(min_value)
+        spinbox.setMaximum(max_value)
+        spinbox.setValue(initial_value)
+        spinbox.setFixedWidth(60)
+        if callback:
+            spinbox.valueChanged.connect(callback)
+        container_layout.addWidget(spinbox)
+        
+        self.layout.addWidget(container)
+        return spinbox
 
 class Dot(QWidget):
     """A simple dot widget used for visual representations."""

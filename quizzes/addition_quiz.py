@@ -13,8 +13,13 @@ from .styles import (
 class AdditionQuiz(BaseQuiz):
     """Quiz for practicing addition problems with visual aids."""
     
-    def __init__(self, total_questions=20):
-        """Initialize the addition quiz with visual aids."""
+    def __init__(self, total_questions=10, show_questions_control=True):
+        """Initialize the addition quiz with visual aids.
+        
+        Args:
+            total_questions: Number of questions in the quiz
+            show_questions_control: Whether to show the questions count control
+        """
         super().__init__(total_questions=total_questions)
         
         # Add navigation bar with visual aid toggle
@@ -22,6 +27,14 @@ class AdditionQuiz(BaseQuiz):
         self.show_visual_aid_checkbox = self.nav_bar.add_checkbox(
             "Pokaż podpowiedź", True, self.toggle_visual_aid
         )
+        
+        # Add spinbox for number of questions if enabled
+        if show_questions_control:
+            self.questions_spinbox = self.nav_bar.add_questions_spinbox(
+                initial_value=total_questions,
+                callback=self.update_total_questions
+            )
+        
         self.layout.insertWidget(0, self.nav_bar)
         
         # Visual aid container setup
@@ -112,4 +125,16 @@ class AdditionQuiz(BaseQuiz):
     
     def format_question_with_answer(self):
         """Format the addition question with the answer."""
-        return f"{self.num1} + {self.num2} = {self.correct_answer}" 
+        return f"{self.num1} + {self.num2} = {self.correct_answer}"
+    
+    def update_total_questions(self, value):
+        """Update the total number of questions for the quiz."""
+        self.total_questions = value
+        # Update the progress bar range
+        self.progress_bar.setRange(0, value)
+        # Update the label
+        self.progress_label.setText(f"Pytanie {self.current_question}/{self.total_questions}")
+        
+        # If we're already past the new total, show results
+        if self.current_question > self.total_questions and not self.quiz_completed:
+            self.show_results() 
