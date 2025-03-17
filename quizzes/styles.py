@@ -68,7 +68,7 @@ SHOW_HINT_BUTTON_STYLE = """
 """
 
 # Label styles
-QUESTION_LABEL_STYLE = "font-size: 24px; font-weight: bold;"
+QUESTION_LABEL_STYLE = "font-size: 28px; font-weight: bold;"
 QUESTION_CORRECT_STYLE = "font-size: 24px; font-weight: bold; color: green;"
 QUESTION_INCORRECT_STYLE = "font-size: 24px; font-weight: bold; color: red;"
 
@@ -76,8 +76,8 @@ FEEDBACK_LABEL_STYLE = "font-size: 18px;"
 FEEDBACK_CORRECT_STYLE = "font-size: 18px; color: green;"
 FEEDBACK_INCORRECT_STYLE = "font-size: 18px; color: red;"
 
-EXPLANATION_LABEL_STYLE = "font-size: 16px; color: purple;"
-NUMBER_LABEL_STYLE = "font-size: 16px;"
+EXPLANATION_LABEL_STYLE = "font-size: 16px; color: white;"
+NUMBER_LABEL_STYLE = "font-size: 18px;"
 
 # Debug border styles (can be removed in production)
 MAIN_BORDER_STYLE = "QWidget { border: 2px solid black; }"

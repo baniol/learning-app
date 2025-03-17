@@ -9,9 +9,9 @@ from .components import NavigationBar, VisualAidWidget
 class AdditionQuiz(BaseQuiz):
     """Quiz for practicing addition problems with visual aids."""
     
-    def __init__(self):
+    def __init__(self, total_questions=20):
         """Initialize the addition quiz with visual aids."""
-        super().__init__()
+        super().__init__(total_questions=total_questions)
         
         # Add navigation bar with visual aid toggle
         self.nav_bar = NavigationBar(self.return_to_menu)

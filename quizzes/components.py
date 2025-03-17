@@ -176,8 +176,8 @@ class VisualAidWidget(QWidget):
         self.layout.addWidget(self.visual_container)
         
         # Create dot groups
-        self.first_group = DotsGroup(num1, BLUE_DOT_COLOR, f"First number: {num1}")
-        self.second_group = DotsGroup(num2, RED_DOT_COLOR, f"Second number: {num2}")
+        self.first_group = DotsGroup(num1, BLUE_DOT_COLOR, f"{num1}")
+        self.second_group = DotsGroup(num2, RED_DOT_COLOR, f"{num2}")
         
         # Add groups to main layout
         self.visual_layout.addWidget(self.first_group)
@@ -200,12 +200,6 @@ class VisualAidWidget(QWidget):
         self.show_button.setStyleSheet(SHOW_HINT_BUTTON_STYLE)
         self.show_button.clicked.connect(self.show_complement)
         self.layout.addWidget(self.show_button, alignment=Qt.AlignCenter)
-        
-        # Add explanation label
-        self.explanation_label = QLabel()
-        self.explanation_label.setStyleSheet(EXPLANATION_LABEL_STYLE)
-        self.explanation_label.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.explanation_label)
     
     def show_complement(self):
         """Show how to make 10 by moving dots from smaller to larger number."""
@@ -242,14 +236,7 @@ class VisualAidWidget(QWidget):
         larger_group.add_dots(self.complement, YELLOW_DOT_COLOR)
         
         # Update the labels
-        larger_group.update_label(f"First number: {larger_number} + {self.complement} = 10")
-        smaller_group.update_label(f"Second number: {smaller_number} - {dots_to_move} = {smaller_number - dots_to_move}")
-        
-        # Update explanation
-        if hasattr(self, 'explanation_label'):
-            self.explanation_label.setText(
-                f"Move {dots_to_move} from {smaller_number} to make {larger_number} become 10. "
-                f"Then add the remaining {smaller_number - dots_to_move} to get {10 + (smaller_number - dots_to_move)}."
-            )
+        larger_group.update_label(f"{larger_number} + {self.complement} = 10")
+        smaller_group.update_label(f"{smaller_number} - {dots_to_move} = {smaller_number - dots_to_move}")
         
         self.complement_shown = True 

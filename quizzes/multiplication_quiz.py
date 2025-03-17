@@ -7,9 +7,9 @@ from .components import NavigationBar
 class MultiplicationQuiz(BaseQuiz):
     """Quiz for practicing multiplication problems."""
     
-    def __init__(self):
+    def __init__(self, total_questions=20):
         """Initialize the multiplication quiz."""
-        super().__init__()
+        super().__init__(total_questions=total_questions)
         
         # Add navigation bar
         self.nav_bar = NavigationBar(self.return_to_menu)

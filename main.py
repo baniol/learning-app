@@ -81,9 +81,9 @@ class MainWindow(QMainWindow):
 
     def on_button_click(self, name):
         if name == "Multiplication Quiz":
-            self.show_quiz(MultiplicationQuiz())
+            self.show_quiz(MultiplicationQuiz(total_questions=20))
         elif name == "Addition Quiz":
-            self.show_quiz(AdditionQuiz())
+            self.show_quiz(AdditionQuiz(total_questions=20))
         else:
             print(f"{name} clicked")
 
@@ -140,12 +140,12 @@ class MainWindow(QMainWindow):
             button.setEnabled(False)
         
         if selected_answer == self.correct_answer:
-            self.feedback_label.setText("Correct! Well done!")
+            self.feedback_label.setText("Super! Dobra robota!")
             self.feedback_label.setStyleSheet("font-size: 18px; color: green;")
             self.question_label.setText(f"{self.num1} × {self.num2} = {self.correct_answer}")
             self.question_label.setStyleSheet("font-size: 24px; font-weight: bold; color: green;")
         else:
-            self.feedback_label.setText(f"Wrong! The correct answer was {self.correct_answer}")
+            self.feedback_label.setText(f"Nie! Poprawna odpowiedź to {self.correct_answer}")
             self.feedback_label.setStyleSheet("font-size: 18px; color: red;")
             self.question_label.setText(f"{self.num1} × {self.num2} = {self.correct_answer}")
             self.question_label.setStyleSheet("font-size: 24px; font-weight: bold; color: red;")
