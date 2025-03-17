@@ -1,15 +1,16 @@
 """
 Base quiz class that provides common functionality for all quizzes.
 """
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar, QGridLayout
 from PySide6.QtCore import Qt
 import random
 from .styles import (
     QUESTION_LABEL_STYLE, QUESTION_CORRECT_STYLE, QUESTION_INCORRECT_STYLE,
     FEEDBACK_LABEL_STYLE, FEEDBACK_CORRECT_STYLE, FEEDBACK_INCORRECT_STYLE,
     ANSWER_BUTTON_STYLE, NEXT_BUTTON_STYLE, MAIN_BORDER_STYLE,
-    DEFAULT_SPACING, BUTTON_SPACING
+    DEFAULT_SPACING, BUTTON_SPACING, RETURN_BUTTON_STYLE
 )
+from PySide6.QtGui import QFont
 
 class BaseQuiz(QWidget):
     """Base class for all quizzes with common UI and functionality."""
@@ -33,7 +34,9 @@ class BaseQuiz(QWidget):
         
         # Progress bar
         self.progress_container = QWidget()
+        self.progress_container.setFixedHeight(50)
         self.progress_layout = QHBoxLayout()
+        self.progress_layout.setContentsMargins(5, 5, 5, 5)  # Reduce internal margins
         self.progress_container.setLayout(self.progress_layout)
         
         self.progress_label = QLabel(f"Question 0/{self.total_questions}")
@@ -53,28 +56,54 @@ class BaseQuiz(QWidget):
         self.question_label = QLabel()
         self.question_label.setStyleSheet(QUESTION_LABEL_STYLE)
         self.question_label.setAlignment(Qt.AlignCenter)
+        self.question_label.setFixedHeight(80)  # Fixed height
         self.layout.addWidget(self.question_label)
         
-        # Answer buttons container - horizontal layout
+        # Create a single row widget with 3 columns for answers, feedback, and next button
+        self.interaction_widget = QWidget()
+        self.interaction_layout = QHBoxLayout()
+        self.interaction_layout.setSpacing(DEFAULT_SPACING)
+        self.interaction_widget.setLayout(self.interaction_layout)
+        
+        # Answer buttons container - grid layout
         self.answers_widget = QWidget()
-        self.answers_layout = QHBoxLayout()
+        self.answers_layout = QGridLayout()
         self.answers_layout.setSpacing(BUTTON_SPACING)
         self.answers_widget.setLayout(self.answers_layout)
-        self.layout.addWidget(self.answers_widget)
+        self.interaction_layout.addWidget(self.answers_widget, 2)  # 2 parts for answers
+        
+        # Feedback label container
+        self.feedback_container = QWidget()
+        self.feedback_layout = QVBoxLayout()
+        self.feedback_layout.setContentsMargins(10, 0, 10, 0)  # Add some horizontal padding
+        self.feedback_container.setLayout(self.feedback_layout)
         
         # Feedback label
         self.feedback_label = QLabel()
         self.feedback_label.setStyleSheet(FEEDBACK_LABEL_STYLE)
         self.feedback_label.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.feedback_label)
+        self.feedback_label.setWordWrap(True)  # Allow text wrapping
+        self.feedback_layout.addWidget(self.feedback_label)
+        self.interaction_layout.addWidget(self.feedback_container, 2)  # 2 parts for feedback
+        
+        # Next button container
+        self.next_button_container = QWidget()
+        self.next_button_layout = QVBoxLayout()
+        self.next_button_layout.setContentsMargins(0, 0, 0, 0)
+        self.next_button_container.setLayout(self.next_button_layout)
         
         # Next question button
-        self.next_button = QPushButton("Next Question")
-        self.next_button.setMinimumSize(200, 50)
+        self.next_button = QPushButton("➡️")  # Right arrow emoji
+        self.next_button.setFixedSize(60, 60)  # Fixed size
         self.next_button.setStyleSheet(NEXT_BUTTON_STYLE)
+        self.next_button.setFont(QFont("Arial", 20))  # Adjust font size for the emoji
         self.next_button.clicked.connect(self.on_next_button_click)
         self.next_button.hide()
-        self.layout.addWidget(self.next_button, alignment=Qt.AlignCenter)
+        self.next_button_layout.addWidget(self.next_button, alignment=Qt.AlignCenter)
+        self.interaction_layout.addWidget(self.next_button_container, 1)  # 1 part for button
+        
+        # Add the interaction widget to the main layout
+        self.layout.addWidget(self.interaction_widget)
         
         # Results widget (initially hidden)
         self.results_widget = QWidget()
@@ -91,17 +120,30 @@ class BaseQuiz(QWidget):
         self.results_score.setAlignment(Qt.AlignCenter)
         self.results_layout.addWidget(self.results_score)
         
-        self.restart_button = QPushButton("Start New Quiz")
-        self.restart_button.setMinimumSize(200, 50)
-        self.restart_button.setStyleSheet(NEXT_BUTTON_STYLE)
-        self.restart_button.clicked.connect(self.restart_quiz)
-        self.results_layout.addWidget(self.restart_button, alignment=Qt.AlignCenter)
+        # Button container for results screen
+        self.results_buttons = QWidget()
+        self.results_buttons_layout = QHBoxLayout()
+        self.results_buttons.setLayout(self.results_buttons_layout)
         
-        self.menu_button = QPushButton("Return to Menu")
-        self.menu_button.setMinimumSize(200, 50)
-        self.menu_button.setStyleSheet(NEXT_BUTTON_STYLE)
+        # Restart button with icon
+        self.restart_button = QPushButton("🔄")  # Restart emoji
+        self.restart_button.setMinimumSize(80, 80)
+        self.restart_button.setStyleSheet(NEXT_BUTTON_STYLE)
+        self.restart_button.setFont(QFont("Arial", 20))
+        self.restart_button.setToolTip("Start New Quiz")
+        self.restart_button.clicked.connect(self.restart_quiz)
+        self.results_buttons_layout.addWidget(self.restart_button)
+        
+        # Menu button with icon
+        self.menu_button = QPushButton("🏠")  # Home emoji
+        self.menu_button.setMinimumSize(80, 80)
+        self.menu_button.setStyleSheet(RETURN_BUTTON_STYLE)
+        self.menu_button.setFont(QFont("Arial", 20))
+        self.menu_button.setToolTip("Return to Menu")
         self.menu_button.clicked.connect(self.return_to_menu)
-        self.results_layout.addWidget(self.menu_button, alignment=Qt.AlignCenter)
+        self.results_buttons_layout.addWidget(self.menu_button)
+        
+        self.results_layout.addWidget(self.results_buttons, alignment=Qt.AlignCenter)
         
         self.layout.addWidget(self.results_widget)
         self.results_widget.hide()
@@ -127,8 +169,8 @@ class BaseQuiz(QWidget):
         
         # Reset UI
         self.progress_bar.setValue(0)
-        self.progress_label.setText(f"Question 0/{self.total_questions}")
-        self.score_label.setText("Score: 0%")
+        self.progress_label.setText(f"Pytanie 0/{self.total_questions}")
+        self.score_label.setText("Punkty: 0%")
         
         # Show quiz UI, hide results
         self.question_label.show()
@@ -197,11 +239,13 @@ class BaseQuiz(QWidget):
         else:
             self.results_score.setStyleSheet("font-size: 20px; color: red;")
         
-        # Hide quiz UI, show results
-        self.question_label.hide()
-        self.answers_widget.hide()
-        self.feedback_label.hide()
+        # Hide quiz UI elements but maintain their space
+        self.question_label.setText("")
+        self.feedback_label.setText("")
+        self.clear_answer_buttons()
         self.next_button.hide()
+        
+        # Show results
         self.results_widget.show()
     
     def generate_numbers(self):
@@ -230,13 +274,20 @@ class BaseQuiz(QWidget):
         return options
     
     def create_answer_buttons(self, options):
-        """Create buttons for each answer option."""
-        for option in options:
+        """Create buttons for each answer option in a 2x2 grid."""
+        # Clear previous buttons
+        self.clear_answer_buttons()
+        
+        # Create new answer buttons in a grid (2x2)
+        for i, option in enumerate(options):
+            row = i // 2  # Integer division for row
+            col = i % 2   # Modulo for column
+            
             button = QPushButton(str(option))
-            button.setMinimumSize(100, 80)
+            button.setFixedSize(80, 50)  # Smaller fixed size
             button.setStyleSheet(ANSWER_BUTTON_STYLE)
             button.clicked.connect(lambda checked, ans=option: self.check_answer(ans))
-            self.answers_layout.addWidget(button)
+            self.answers_layout.addWidget(button, row, col)
 
     def check_answer(self, selected_answer):
         """Check if the selected answer is correct and update the UI accordingly."""
@@ -253,25 +304,25 @@ class BaseQuiz(QWidget):
         
         # Update score
         score_percent = int((self.correct_answers / self.current_question) * 100)
-        self.score_label.setText(f"Score: {score_percent}%")
+        self.score_label.setText(f"Punkty: {score_percent}%")
         
         # Show next button
         if self.current_question >= self.total_questions:
-            self.next_button.setText("Show Results")
+            self.next_button.setText("✅")
         else:
-            self.next_button.setText("Next Question")
+            self.next_button.setText("➡️")
         self.next_button.show()
     
     def show_correct_feedback(self):
         """Show feedback for a correct answer."""
-        self.feedback_label.setText("Correct! Well done!")
+        self.feedback_label.setText("Super! Dobra robota!")
         self.feedback_label.setStyleSheet(FEEDBACK_CORRECT_STYLE)
         self.question_label.setText(self.format_question_with_answer())
         self.question_label.setStyleSheet(QUESTION_CORRECT_STYLE)
     
     def show_incorrect_feedback(self):
         """Show feedback for an incorrect answer."""
-        self.feedback_label.setText(f"Wrong! The correct answer was {self.correct_answer}")
+        self.feedback_label.setText(f"Niestety, poprawna odpowiedź to {self.correct_answer}")
         self.feedback_label.setStyleSheet(FEEDBACK_INCORRECT_STYLE)
         self.question_label.setText(self.format_question_with_answer())
         self.question_label.setStyleSheet(QUESTION_INCORRECT_STYLE)

@@ -10,7 +10,8 @@ from .styles import (
     SECOND_GROUP_BORDER_STYLE, VISUAL_AID_BORDER_STYLE,
     NUMBER_LABEL_STYLE, SHOW_HINT_BUTTON_STYLE,
     EXPLANATION_LABEL_STYLE, DEFAULT_SPACING, DOTS_ROW_SIZE,
-    NAV_BAR_BORDER_STYLE, RETURN_BUTTON_STYLE
+    NAV_BAR_BORDER_STYLE, RETURN_BUTTON_STYLE,
+    VISUAL_AID_HEIGHT
 )
 
 class NavigationBar(QWidget):
@@ -159,21 +160,29 @@ class VisualAidWidget(QWidget):
     def __init__(self, num1, num2):
         super().__init__()
         self.setStyleSheet(VISUAL_AID_BORDER_STYLE)
+        self.setFixedHeight(VISUAL_AID_HEIGHT)
         self.num1 = num1
         self.num2 = num2
         self.complement_shown = False
         
-        # Main layout
-        self.layout = QVBoxLayout()
-        self.layout.setSpacing(DEFAULT_SPACING * 2)  # Double spacing between elements
+        # Main layout - changed to horizontal
+        self.layout = QHBoxLayout()
+        self.layout.setSpacing(DEFAULT_SPACING)
         self.setLayout(self.layout)
+        
+        # Left side container for dots
+        self.dots_container = QWidget()
+        self.dots_layout = QVBoxLayout()
+        self.dots_layout.setSpacing(DEFAULT_SPACING)
+        self.dots_container.setLayout(self.dots_layout)
+        self.layout.addWidget(self.dots_container, 4)  # Give more space to dots
         
         # Container for the visual representation
         self.visual_container = QWidget()
         self.visual_layout = QHBoxLayout()
-        self.visual_layout.setSpacing(DEFAULT_SPACING * 4)  # Quadruple spacing between groups
+        self.visual_layout.setSpacing(DEFAULT_SPACING * 2)  # Double spacing between groups
         self.visual_container.setLayout(self.visual_layout)
-        self.layout.addWidget(self.visual_container)
+        self.dots_layout.addWidget(self.visual_container)
         
         # Create dot groups
         self.first_group = DotsGroup(num1, BLUE_DOT_COLOR, f"{num1}")
@@ -188,6 +197,13 @@ class VisualAidWidget(QWidget):
         self.smaller_number = min(num1, num2)
         self.complement = 10 - self.larger_number if self.larger_number < 10 else 0
         
+        # Right side container for controls (button)
+        self.controls_container = QWidget()
+        self.controls_layout = QVBoxLayout()
+        self.controls_layout.setContentsMargins(5, 0, 0, 0)  # Small left margin
+        self.controls_container.setLayout(self.controls_layout)
+        self.layout.addWidget(self.controls_container, 1)  # Less space for button
+        
         # Add complement button if needed
         if self.complement > 0:
             self.add_complement_controls()
@@ -195,14 +211,13 @@ class VisualAidWidget(QWidget):
     def add_complement_controls(self):
         """Add controls for showing the complement to 10."""
         # Add show button
-        self.show_button = QPushButton("Show how to make 10")
-        self.show_button.setMinimumSize(200, 40)
+        self.show_button = QPushButton("Podpowiedź")
+        self.show_button.setMinimumSize(100, 40)
         self.show_button.setStyleSheet(SHOW_HINT_BUTTON_STYLE)
         self.show_button.clicked.connect(self.show_complement)
-        self.layout.addWidget(self.show_button, alignment=Qt.AlignCenter)
+        self.controls_layout.addWidget(self.show_button, alignment=Qt.AlignCenter)
     
     def show_complement(self):
-        """Show how to make 10 by moving dots from smaller to larger number."""
         if self.complement <= 0 or self.complement_shown:
             return
             

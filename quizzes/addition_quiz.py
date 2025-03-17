@@ -2,9 +2,13 @@
 Addition quiz implementation with visual aids.
 """
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout
 import random
 from .base_quiz import BaseQuiz
 from .components import NavigationBar, VisualAidWidget
+from .styles import (
+    DEFAULT_SPACING
+)
 
 class AdditionQuiz(BaseQuiz):
     """Quiz for practicing addition problems with visual aids."""
@@ -16,13 +20,21 @@ class AdditionQuiz(BaseQuiz):
         # Add navigation bar with visual aid toggle
         self.nav_bar = NavigationBar(self.return_to_menu)
         self.show_visual_aid_checkbox = self.nav_bar.add_checkbox(
-            "Show dots helper", True, self.toggle_visual_aid
+            "Pokaż podpowiedź", True, self.toggle_visual_aid
         )
         self.layout.insertWidget(0, self.nav_bar)
         
-        # Add visual aid widget after nav bar
+        self.visual_aid_container = QWidget()
+        self.visual_aid_layout = QVBoxLayout()
+        self.visual_aid_layout.setContentsMargins(0, 0, 0, 0)
+        self.visual_aid_container.setLayout(self.visual_aid_layout)
+        
+        # Add visual aid widget to container
         self.visual_aid = VisualAidWidget(0, 0)
-        self.layout.insertWidget(1, self.visual_aid)
+        self.visual_aid_layout.addWidget(self.visual_aid)
+        
+        # Add container to main layout
+        self.layout.insertWidget(1, self.visual_aid_container)
     
     def return_to_menu(self):
         """Return to the main menu."""
@@ -31,10 +43,6 @@ class AdditionQuiz(BaseQuiz):
     def toggle_visual_aid(self, state):
         """Toggle the visibility of the visual aid."""
         self.visual_aid.setVisible(self.show_visual_aid_checkbox.isChecked())
-        if self.show_visual_aid_checkbox.isChecked():
-            self.visual_aid.updateGeometry()
-            self.visual_aid.update()
-            self.layout.update()
     
     def generate_numbers(self):
         """Generate numbers where the sum is 10 or greater."""
@@ -49,12 +57,14 @@ class AdditionQuiz(BaseQuiz):
         # Store current visibility state
         was_visible = self.visual_aid.isVisible()
         
-        # Update visual aid
+        # Remove old visual aid from container
         self.visual_aid.deleteLater()
-        self.visual_aid = VisualAidWidget(self.num1, self.num2)
-        self.layout.insertWidget(1, self.visual_aid)
         
-        # Restore visibility state
+        # Create new visual aid
+        self.visual_aid = VisualAidWidget(self.num1, self.num2)
+        
+        # Add to container and restore visibility
+        self.visual_aid_layout.addWidget(self.visual_aid)
         self.visual_aid.setVisible(was_visible)
     
     def calculate_answer(self):
