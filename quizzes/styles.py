@@ -80,12 +80,18 @@ EXPLANATION_LABEL_STYLE = "font-size: 16px; color: white;"
 NUMBER_LABEL_STYLE = "font-size: 18px;"
 
 # Debug border styles (can be removed in production)
-MAIN_BORDER_STYLE = "QWidget { border: 2px solid black; }"
-NAV_BAR_BORDER_STYLE = "QWidget { border: 2px solid yellow; }"
-VISUAL_AID_BORDER_STYLE = "QWidget { border: 2px solid red; }"
-FIRST_GROUP_BORDER_STYLE = "QWidget { border: 2px solid green; }"
-SECOND_GROUP_BORDER_STYLE = "QWidget { border: 2px solid orange; }"
-DOTS_CONTAINER_BORDER_STYLE = "QWidget { border: 2px solid purple; }"
+MAIN_BORDER_STYLE = ""  # Removed border
+NAV_BAR_BORDER_STYLE = ""  # Removed border
+VISUAL_AID_BORDER_STYLE = ""  # Removed border
+FIRST_GROUP_BORDER_STYLE = ""  # Removed border
+SECOND_GROUP_BORDER_STYLE = ""  # Removed border
+DOTS_CONTAINER_BORDER_STYLE = ""  # Removed border
+# MAIN_BORDER_STYLE = "QWidget { border: 2px solid black; }"
+# NAV_BAR_BORDER_STYLE = "QWidget { border: 2px solid yellow; }"
+# VISUAL_AID_BORDER_STYLE = "QWidget { border: 2px solid red; }"
+# FIRST_GROUP_BORDER_STYLE = "QWidget { border: 2px solid green; }"
+# SECOND_GROUP_BORDER_STYLE = "QWidget { border: 2px solid orange; }"
+# DOTS_CONTAINER_BORDER_STYLE = "QWidget { border: 2px solid purple; }"
 
 # Colors
 BLUE_DOT_COLOR = (0, 0, 255)  # RGB for blue dots
