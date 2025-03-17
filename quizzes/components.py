@@ -2,7 +2,7 @@
 Reusable UI components for the quiz application.
 """
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QCheckBox, QSizePolicy
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPainter, QColor
 from .styles import (
     BLUE_DOT_COLOR, RED_DOT_COLOR, YELLOW_DOT_COLOR, 
@@ -11,7 +11,8 @@ from .styles import (
     NUMBER_LABEL_STYLE, SHOW_HINT_BUTTON_STYLE,
     EXPLANATION_LABEL_STYLE, DEFAULT_SPACING, DOTS_ROW_SIZE,
     NAV_BAR_BORDER_STYLE, RETURN_BUTTON_STYLE,
-    VISUAL_AID_HEIGHT
+    VISUAL_AID_HEIGHT, SCORE_GOOD_COLOR, SCORE_BAD_COLOR,
+    SCORE_BOX_WIDTH, SCORE_BOX_HEIGHT, SCORE_BOX_STYLE
 )
 
 class NavigationBar(QWidget):
@@ -258,3 +259,47 @@ class VisualAidWidget(QWidget):
         smaller_group.update_label(f"{smaller_number} - {dots_to_move} = {smaller_number - dots_to_move}")
         
         self.complement_shown = True 
+
+class ScoreIndicator(QWidget):
+    """A score indicator showing a horizontal bar with green (correct) and red (incorrect) portions."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(SCORE_BOX_WIDTH * 3, SCORE_BOX_HEIGHT)  # Make it wider for better visualization
+        self.setStyleSheet(SCORE_BOX_STYLE)
+        self.correct = 0
+        self.total = 0
+        
+    def set_score(self, correct, total):
+        """Set the score values and update the display."""
+        self.correct = correct
+        self.total = total
+        self.update()  # Trigger repaint
+        
+    def paintEvent(self, event):
+        """Paint the score indicator with proportional green/red bars."""
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Draw the background/border
+        width = self.width() - 2  # Account for border
+        height = self.height() - 2
+        
+        # Start with a blank/empty indicator when no questions answered
+        if self.total == 0:
+            return
+            
+        # Calculate proportions
+        correct_width = int((self.correct / self.total) * width) if self.total > 0 else 0
+        incorrect_width = width - correct_width
+        
+        # Draw the correct (green) portion
+        if correct_width > 0:
+            painter.setBrush(QColor(*SCORE_GOOD_COLOR))
+            painter.setPen(Qt.NoPen)
+            painter.drawRect(QRect(1, 1, correct_width, height))
+        
+        # Draw the incorrect (red) portion
+        if incorrect_width > 0:
+            painter.setBrush(QColor(*SCORE_BAD_COLOR))
+            painter.setPen(Qt.NoPen)
+            painter.drawRect(QRect(1 + correct_width, 1, incorrect_width, height)) 

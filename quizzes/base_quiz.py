@@ -11,6 +11,7 @@ from .styles import (
     DEFAULT_SPACING, BUTTON_SPACING, RETURN_BUTTON_STYLE
 )
 from PySide6.QtGui import QFont
+from .components import ScoreIndicator
 
 class BaseQuiz(QWidget):
     """Base class for all quizzes with common UI and functionality."""
@@ -39,6 +40,7 @@ class BaseQuiz(QWidget):
         self.progress_layout.setContentsMargins(5, 5, 5, 5)  # Reduce internal margins
         self.progress_container.setLayout(self.progress_layout)
         
+        # Progress bar with label
         self.progress_label = QLabel(f"Pytanie 0 z {self.total_questions}")
         self.progress_layout.addWidget(self.progress_label)
         
@@ -47,8 +49,20 @@ class BaseQuiz(QWidget):
         self.progress_bar.setValue(0)
         self.progress_layout.addWidget(self.progress_bar)
         
-        self.score_label = QLabel("Punkty: 0%")
-        self.progress_layout.addWidget(self.score_label)
+        # Score indicator with label
+        score_container = QWidget()
+        score_layout = QHBoxLayout()
+        score_layout.setContentsMargins(0, 0, 0, 0)
+        score_layout.setSpacing(5)
+        score_container.setLayout(score_layout)
+        
+        score_label = QLabel("Wynik:")
+        score_layout.addWidget(score_label)
+        
+        self.score_indicator = ScoreIndicator()
+        score_layout.addWidget(self.score_indicator)
+        
+        self.progress_layout.addWidget(score_container)
         
         self.layout.addWidget(self.progress_container)
         
@@ -166,7 +180,7 @@ class BaseQuiz(QWidget):
         # Reset UI
         self.progress_bar.setValue(0)
         self.progress_label.setText(f"Pytanie 0/{self.total_questions}")
-        self.score_label.setText("Punkty: 0%")
+        self.score_indicator.set_score(0, 0)
         
         # Show quiz UI, hide results
         self.question_label.show()
@@ -298,9 +312,8 @@ class BaseQuiz(QWidget):
         else:
             self.show_incorrect_feedback()
         
-        # Update score
-        score_percent = int((self.correct_answers / self.current_question) * 100)
-        self.score_label.setText(f"Punkty: {score_percent}%")
+        # Update score indicator instead of text label
+        self.score_indicator.set_score(self.correct_answers, self.current_question)
         
         # Show next button
         if self.current_question >= self.total_questions:

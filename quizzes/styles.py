@@ -122,6 +122,8 @@ ANSWERS_CONTAINER_BORDER_STYLE = "QWidget { border: 2px solid green; }" if DEBUG
 BLUE_DOT_COLOR = (0, 0, 255)  # RGB for blue dots
 RED_DOT_COLOR = (255, 0, 0)   # RGB for red dots
 YELLOW_DOT_COLOR = (255, 255, 0)  # RGB for highlighted dots
+SCORE_GOOD_COLOR = (80, 200, 120)  # RGB for good score (green)
+SCORE_BAD_COLOR = (220, 70, 70)    # RGB for bad score (red)
 
 # Layout settings
 DEFAULT_SPACING = 10
@@ -169,4 +171,13 @@ MENU_ITEMS = [
 QUIZ_TYPE_MAP = {
     "Mnożenie": "MultiplicationQuiz",
     "Dodawanie do 20": "AdditionQuiz"
-} 
+}
+
+# Score box styles
+SCORE_BOX_WIDTH = 60 
+SCORE_BOX_HEIGHT = 18
+SCORE_BOX_STYLE = """
+    border: 1px solid #888;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+""" 
