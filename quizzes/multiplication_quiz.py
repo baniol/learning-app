@@ -1,6 +1,7 @@
 """
 Multiplication quiz implementation.
 """
+import random
 from .base_quiz import BaseQuiz
 from .components import NavigationBar
 
@@ -27,6 +28,11 @@ class MultiplicationQuiz(BaseQuiz):
             )
         
         self.layout.insertWidget(0, self.nav_bar)
+    
+    def generate_numbers(self):
+        """Generate numbers from 2 to 5 for multiplication, avoiding multiplying by 1."""
+        self.num1 = random.randint(2, 5)
+        self.num2 = random.randint(2, 5)
     
     def return_to_menu(self):
         """Return to the main menu."""

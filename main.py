@@ -3,6 +3,7 @@ import sys
 import random
 from quizzes.multiplication_quiz import MultiplicationQuiz
 from quizzes.addition_quiz import AdditionQuiz
+from quizzes.custom_quizzes import SmallMultiplicationQuiz, SubtractionQuiz
 from PySide6.QtCore import Qt
 from quizzes.styles import (
     WINDOW_TITLE, WINDOW_INITIAL_POSITION, WINDOW_INITIAL_SIZE, WINDOW_MINIMUM_SIZE,

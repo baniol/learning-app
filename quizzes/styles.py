@@ -159,18 +159,20 @@ INCORRECT_FEEDBACK = "Nie! Poprawna odpowiedź to {}"
 
 # Menu items
 MENU_ITEMS = [
-    "Mnożenie",
-    "Dodawanie do 20", 
-    "Item 3",
-    "Item 4", 
+    "Mnożenie 2-5",
+    "Dodawanie do 20",
+    "Mnożenie małych liczb",
+    "Odejmowanie",
     "Item 5", 
     "Item 6"
 ]
 
 # Quiz type mapping
 QUIZ_TYPE_MAP = {
-    "Mnożenie": "MultiplicationQuiz",
-    "Dodawanie do 20": "AdditionQuiz"
+    "Mnożenie 2-5": "MultiplicationQuiz",
+    "Dodawanie do 20": "AdditionQuiz",
+    "Mnożenie małych liczb": "SmallMultiplicationQuiz",
+    "Odejmowanie": "SubtractionQuiz"
 }
 
 # Score box styles
