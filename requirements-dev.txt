@@ -1,0 +1,17 @@
+black==24.2.0
+click==8.1.8
+flake8==7.0.0
+isort==5.13.2
+mccabe==0.7.0
+mypy==1.8.0
+mypy-extensions==1.0.0
+packaging==24.2
+pathspec==0.12.1
+platformdirs==4.3.6
+pycodestyle==2.11.1
+pyflakes==3.2.0
+PySide6==6.8.2.1
+PySide6_Addons==6.8.2.1
+PySide6_Essentials==6.8.2.1
+shiboken6==6.8.2.1
+typing_extensions==4.12.2

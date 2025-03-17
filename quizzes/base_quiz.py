@@ -1,10 +1,14 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
 import random
+from PySide6.QtCore import Qt
 
 class BaseQuiz(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout()
+        # Set minimal margins for the main layout
+        self.layout.setContentsMargins(10, 0, 10, 10)  # Left, Top, Right, Bottom
+        self.layout.setSpacing(10)  # Reduce spacing between widgets
         self.setLayout(self.layout)
         
         # Question label
@@ -12,9 +16,10 @@ class BaseQuiz(QWidget):
         self.question_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         self.layout.addWidget(self.question_label)
         
-        # Answer buttons container
+        # Answer buttons container - changed to horizontal layout
         self.answers_widget = QWidget()
-        self.answers_layout = QVBoxLayout()
+        self.answers_layout = QHBoxLayout()  # Changed from QVBoxLayout to QHBoxLayout
+        self.answers_layout.setSpacing(15)  # Add spacing between buttons
         self.answers_widget.setLayout(self.answers_layout)
         self.layout.addWidget(self.answers_widget)
         
@@ -25,10 +30,27 @@ class BaseQuiz(QWidget):
         
         # Next question button
         self.next_button = QPushButton("Next Question")
-        self.next_button.setFixedSize(200, 50)
+        self.next_button.setMinimumSize(200, 50)
+        # Add distinct styling
+        self.next_button.setStyleSheet("""
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 8px;
+                border: 2px solid #F57C00;
+            }
+            QPushButton:hover {
+                background-color: #F57C00;
+            }
+            QPushButton:pressed {
+                background-color: #E65100;
+            }
+        """)
         self.next_button.clicked.connect(self.generate_new_question)
         self.next_button.hide()
-        self.layout.addWidget(self.next_button)
+        self.layout.addWidget(self.next_button, alignment=Qt.AlignCenter)
 
     def generate_new_question(self):
         # Clear previous answer buttons
@@ -53,10 +75,27 @@ class BaseQuiz(QWidget):
         
         random.shuffle(options)
         
-        # Create new answer buttons
+        # Create new answer buttons with improved styling
         for option in options:
             button = QPushButton(str(option))
-            button.setFixedSize(200, 50)
+            button.setMinimumSize(100, 80)  # Larger, more square buttons
+            # Add distinct styling
+            button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4a86e8;
+                    color: white;
+                    font-size: 18px;
+                    font-weight: bold;
+                    border-radius: 10px;
+                    border: 2px solid #2d5bb9;
+                }
+                QPushButton:hover {
+                    background-color: #2d5bb9;
+                }
+                QPushButton:pressed {
+                    background-color: #1c3a75;
+                }
+            """)
             button.clicked.connect(lambda checked, ans=option: self.check_answer(ans))
             self.answers_layout.addWidget(button)
         

@@ -119,22 +119,27 @@ class VisualAidWidget(QWidget):
         self.complement = 10 - self.target_number if self.target_number < 10 else 0
         
         if self.complement > 0:
-            hint_label = QLabel(f"Let's make 10 first! We need {self.complement} more to make 10")
-            hint_label.setStyleSheet("font-size: 16px; color: green;")
-            hint_label.setAlignment(Qt.AlignCenter)  # Center the hint
-            self.layout.addWidget(hint_label)
-            
             # Add show button
             show_button = QPushButton("Show how to make 10")
             show_button.setMinimumSize(200, 40)  # Set minimum size instead of fixed
+            # Add distinct styling
+            show_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4CAF50;
+                    color: white;
+                    font-weight: bold;
+                    border-radius: 8px;
+                    border: 2px solid #388E3C;
+                }
+                QPushButton:hover {
+                    background-color: #388E3C;
+                }
+                QPushButton:pressed {
+                    background-color: #1B5E20;
+                }
+            """)
             show_button.clicked.connect(self.show_complement)
-            self.layout.addWidget(show_button, alignment=Qt.AlignCenter)  # Center the button
-            
-            # Add explanation label
-            self.explanation_label = QLabel()
-            self.explanation_label.setStyleSheet("font-size: 16px; color: purple;")
-            self.explanation_label.setAlignment(Qt.AlignCenter)  # Center the explanation
-            self.layout.addWidget(self.explanation_label)
+            self.layout.addWidget(show_button, alignment=Qt.AlignCenter)
         
         # Store the numbers for complement calculation
         self.num1 = num1
@@ -174,15 +179,7 @@ class VisualAidWidget(QWidget):
             row = target_layout.itemAt(row_index).layout()
             row.addWidget(dot)
             target_dots.append(dot)
-        
-        # Update explanation
-        remaining = self.source_number - self.complement
-        if remaining > 0:
-            self.explanation_label.setText(f"Great! Now we have 10 + {remaining} = {self.num1 + self.num2}\n"
-                                        f"First we made 10, then added {remaining} more")
-        else:
-            self.explanation_label.setText(f"Great! We made exactly 10 = {self.num1 + self.num2}")
-        
+
         self.complement_shown = True
 
     def update_numbers(self, num1, num2):
@@ -278,16 +275,27 @@ class VisualAidWidget(QWidget):
         self.complement = 10 - self.target_number if self.target_number < 10 else 0
         
         if self.complement > 0:
-            hint_label = QLabel(f"Let's make 10 first! We need {self.complement} more to make 10")
-            hint_label.setStyleSheet("font-size: 16px; color: green;")
-            hint_label.setAlignment(Qt.AlignCenter)  # Center the hint
-            self.layout.addWidget(hint_label)
-            
             # Add show button
             show_button = QPushButton("Show how to make 10")
             show_button.setMinimumSize(200, 40)  # Set minimum size instead of fixed
+            # Add distinct styling
+            show_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4CAF50;
+                    color: white;
+                    font-weight: bold;
+                    border-radius: 8px;
+                    border: 2px solid #388E3C;
+                }
+                QPushButton:hover {
+                    background-color: #388E3C;
+                }
+                QPushButton:pressed {
+                    background-color: #1B5E20;
+                }
+            """)
             show_button.clicked.connect(self.show_complement)
-            self.layout.addWidget(show_button, alignment=Qt.AlignCenter)  # Center the button
+            self.layout.addWidget(show_button, alignment=Qt.AlignCenter)
             
             # Add explanation label
             self.explanation_label = QLabel()
@@ -305,17 +313,35 @@ class AdditionQuiz(BaseQuiz):
         super().__init__()
         self.setStyleSheet("QWidget { border: 2px solid black; }")  # Main quiz border
         
-        # Create navigation bar
+        # Set absolute minimal top padding
+        self.layout.setContentsMargins(10, 0, 10, 10)  # Left, Top, Right, Bottom
+        self.layout.setSpacing(5)  # Minimal spacing between elements
+        
+        # Create navigation bar with minimal height
         self.nav_bar = QWidget()
         self.nav_bar.setStyleSheet("QWidget { border: 2px solid yellow; }")  # Nav bar border
+        self.nav_bar.setFixedHeight(40)  # Set fixed height for nav bar
         self.nav_layout = QHBoxLayout()
-        self.nav_layout.setContentsMargins(0, 0, 0, 10)  # Add bottom margin
+        self.nav_layout.setContentsMargins(5, 0, 5, 0)  # No vertical margins
         self.nav_bar.setLayout(self.nav_layout)
         
-        # Add return to menu button
+        # Add return to menu button with reduced height
         self.return_button = QPushButton("Return to Menu")
-        self.return_button.setMinimumSize(150, 40)  # Set minimum size instead of fixed
+        self.return_button.setMinimumSize(150, 30)  # Reduced height
         self.return_button.clicked.connect(self.return_to_menu)
+        # Add styling to the return button
+        self.return_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f44336;
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+                border: 1px solid #ba000d;
+            }
+            QPushButton:hover {
+                background-color: #ba000d;
+            }
+        """)
         self.nav_layout.addWidget(self.return_button)
         
         # Add spacer to push checkbox to the right
@@ -391,12 +417,29 @@ class AdditionQuiz(BaseQuiz):
         
         random.shuffle(options)
         
-        # Create new answer buttons
+        # Create new answer buttons with improved styling
         for option in options:
             button = QPushButton(str(option))
-            button.setMinimumSize(200, 50)  # Set minimum size instead of fixed
+            button.setMinimumSize(100, 80)  # Larger, more square buttons
+            # Add distinct styling
+            button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4a86e8;
+                    color: white;
+                    font-size: 18px;
+                    font-weight: bold;
+                    border-radius: 10px;
+                    border: 2px solid #2d5bb9;
+                }
+                QPushButton:hover {
+                    background-color: #2d5bb9;
+                }
+                QPushButton:pressed {
+                    background-color: #1c3a75;
+                }
+            """)
             button.clicked.connect(lambda checked, ans=option: self.check_answer(ans))
-            self.answers_layout.addWidget(button, alignment=Qt.AlignCenter)  # Center the buttons
+            self.answers_layout.addWidget(button)
         
         # Hide feedback and next button
         self.feedback_label.setText("")

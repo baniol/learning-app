@@ -92,7 +92,8 @@ class MainWindow(QMainWindow):
         for i in reversed(range(self.quiz_layout.count())): 
             self.quiz_layout.itemAt(i).widget().setParent(None)
         
-        # Add new quiz
+        # Add new quiz with minimal margins
+        self.quiz_layout.setContentsMargins(0, 0, 0, 0)  # No margins
         self.quiz_layout.addWidget(quiz)
         self.menu_widget.hide()
         self.quiz_widget.show()
