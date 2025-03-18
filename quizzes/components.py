@@ -1,7 +1,7 @@
 """
 Reusable UI components for the quiz application.
 """
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QCheckBox, QSizePolicy, QSpinBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QCheckBox, QSizePolicy, QSpinBox, QGridLayout
 from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPainter, QColor
 from .styles import (
@@ -327,4 +327,140 @@ class ScoreIndicator(QWidget):
         if incorrect_width > 0:
             painter.setBrush(QColor(*SCORE_BAD_COLOR))
             painter.setPen(Qt.NoPen)
-            painter.drawRect(QRect(1 + correct_width, 1, incorrect_width, height)) 
+            painter.drawRect(QRect(1 + correct_width, 1, incorrect_width, height))
+
+class SubtractionVisualAidWidget(QWidget):
+    """Visual aid for subtraction problems showing dots representation in a two-column layout."""
+    def __init__(self, num1, num2):
+        super().__init__()
+        self.setStyleSheet(VISUAL_AID_BORDER_STYLE)
+        self.setMinimumHeight(VISUAL_AID_HEIGHT)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.num1 = num1  # The minuend (starting number)
+        self.num2 = num2  # The subtrahend (number to subtract)
+        self.solution_shown = False
+        
+        # Main layout - horizontal
+        self.layout = QHBoxLayout()
+        self.layout.setSpacing(DEFAULT_SPACING)
+        self.setLayout(self.layout)
+        
+        # Left side container for dots
+        self.dots_container = QWidget()
+        self.dots_layout = QVBoxLayout()
+        self.dots_layout.setSpacing(DEFAULT_SPACING)
+        self.dots_container.setLayout(self.dots_layout)
+        self.layout.addWidget(self.dots_container, 4)  # Give more space to dots
+        
+        # Add title label
+        if num1 == 0:
+            # Handle initialization with zeros (happens during startup)
+            self.title_label = QLabel("Pomoce wizualne wczytują się...")
+        else:
+            self.title_label = QLabel(f"{num1} - {num2} = ?")
+        self.title_label.setStyleSheet("font-size: 18px; font-weight: bold;")
+        self.title_label.setAlignment(Qt.AlignCenter)
+        self.dots_layout.addWidget(self.title_label)
+        
+        # Container for the visual representation - horizontal layout like addition
+        self.visual_container = QWidget()
+        self.visual_layout = QHBoxLayout()
+        self.visual_layout.setSpacing(DEFAULT_SPACING * 2)  # Double spacing between groups
+        self.visual_container.setLayout(self.visual_layout)
+        self.dots_layout.addWidget(self.visual_container)
+        
+        # Create dot groups
+        self.first_group = DotsGroup(num1, BLUE_DOT_COLOR, f"Mamy {num1}")
+        self.second_group = DotsGroup(num2, RED_DOT_COLOR, f"Odejmujemy {num2}")
+        
+        # Add groups to main layout
+        self.visual_layout.addWidget(self.first_group)
+        self.visual_layout.addWidget(self.second_group)
+        
+        # Result group (initially hidden)
+        self.result_group = QWidget()
+        self.result_layout = QVBoxLayout()
+        self.result_group.setLayout(self.result_layout)
+        self.result_group.hide()
+        self.dots_layout.addWidget(self.result_group)
+        
+        # Result label
+        self.result_label = QLabel(f"Zostaje {num1 - num2}")
+        self.result_label.setStyleSheet("font-size: 16px; font-weight: bold; color: green;")
+        self.result_label.setAlignment(Qt.AlignCenter)
+        self.result_layout.addWidget(self.result_label)
+        
+        # Container for result dots
+        self.result_dots_container = QWidget()
+        self.result_dots_container.setStyleSheet(FIRST_GROUP_BORDER_STYLE)
+        self.result_dots_layout = QVBoxLayout()
+        self.result_dots_container.setLayout(self.result_dots_layout)
+        
+        # Label for result dots
+        self.result_dots_label = QLabel(f"Wynik: {num1 - num2}")
+        self.result_dots_label.setStyleSheet(NUMBER_LABEL_STYLE)
+        self.result_dots_label.setAlignment(Qt.AlignCenter)
+        self.result_dots_layout.addWidget(self.result_dots_label)
+        
+        # Container for actual result dots
+        self.dots_result_container = QWidget()
+        self.dots_result_container.setStyleSheet(DOTS_CONTAINER_BORDER_STYLE)
+        self.dots_result_grid = QVBoxLayout()
+        self.dots_result_container.setLayout(self.dots_result_grid)
+        
+        self.result_layout.addWidget(self.result_dots_container)
+        
+        # Right side container for controls (button)
+        self.controls_container = QWidget()
+        self.controls_layout = QVBoxLayout()
+        self.controls_layout.setContentsMargins(5, 0, 0, 0)  # Small left margin
+        self.controls_container.setLayout(self.controls_layout)
+        self.layout.addWidget(self.controls_container, 1)  # Less space for button
+        
+        # Add show button if not showing zeros
+        if num1 > 0 and num2 > 0:
+            self.show_button = QPushButton("Pokaż rozwiązanie")
+            self.show_button.setMinimumSize(120, 40)
+            self.show_button.setStyleSheet(SHOW_HINT_BUTTON_STYLE)
+            self.show_button.clicked.connect(self.show_solution)
+            self.controls_layout.addWidget(self.show_button, alignment=Qt.AlignCenter)
+    
+    def show_solution(self):
+        """Show the subtraction solution."""
+        if self.solution_shown:
+            return
+            
+        # Create result dots
+        result_value = self.num1 - self.num2
+        self.create_result_dots(result_value)
+        
+        # Show the result group
+        self.result_group.show()
+        
+        # Update title label to show the solution
+        self.title_label.setText(f"{self.num1} - {self.num2} = {result_value}")
+        
+        # Update group labels
+        self.first_group.update_label(f"Mieliśmy {self.num1}")
+        self.second_group.update_label(f"Odjęliśmy {self.num2}")
+        
+        self.solution_shown = True
+        
+        # Disable button
+        self.show_button.setEnabled(False)
+        self.show_button.setText("Rozwiązanie pokazane")
+        
+    def create_result_dots(self, number):
+        """Create dots for the result."""
+        row = QHBoxLayout()
+        row.setAlignment(Qt.AlignCenter)
+        self.dots_result_grid.addLayout(row)
+        
+        for i in range(number):
+            if i > 0 and i % DOTS_ROW_SIZE == 0:
+                row = QHBoxLayout()
+                row.setAlignment(Qt.AlignCenter)
+                self.dots_result_grid.addLayout(row)
+            
+            dot = Dot(YELLOW_DOT_COLOR)
+            row.addWidget(dot) 

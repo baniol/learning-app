@@ -162,7 +162,7 @@ MENU_ITEMS = [
     "Mnożenie 2-5",
     "Dodawanie do 20",
     "Mnożenie małych liczb",
-    "Odejmowanie",
+    "Odejmowanie od 10-20",
     "Item 5", 
     "Item 6"
 ]
@@ -172,7 +172,7 @@ QUIZ_TYPE_MAP = {
     "Mnożenie 2-5": "MultiplicationQuiz",
     "Dodawanie do 20": "AdditionQuiz",
     "Mnożenie małych liczb": "SmallMultiplicationQuiz",
-    "Odejmowanie": "SubtractionQuiz"
+    "Odejmowanie od 10-20": "SubtractionQuiz"
 }
 
 # Score box styles

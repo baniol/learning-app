@@ -32,12 +32,12 @@ def create_small_multiplication_quiz(total_questions=15):
     )
 
 def create_subtraction_quiz(total_questions=15):
-    """Create a subtraction quiz where the result is always positive."""
+    """Create a subtraction quiz where we subtract from numbers between 10 and 20."""
     
     def generate_numbers(quiz):
-        """Generate numbers where the first is greater than the second."""
-        quiz.num1 = random.randint(10, 20)
-        quiz.num2 = random.randint(1, quiz.num1 - 1)  # Ensure positive result
+        """Generate numbers where the first is between 10 and 20."""
+        quiz.num1 = random.randint(10, 20)  # First number (minuend) between 10 and 20
+        quiz.num2 = random.randint(1, 9)    # Second number (subtrahend) between 1 and 9
     
     def calculate_answer(quiz):
         """Calculate the difference."""
@@ -49,11 +49,11 @@ def create_subtraction_quiz(total_questions=15):
     
     # Create the quiz class
     return create_custom_quiz(
-        name="Odejmowanie",
+        name="Odejmowanie od 10-20",
         number_generator=generate_numbers,
         answer_calculator=calculate_answer,
         question_formatter=format_question,
-        visual_aid_class=VisualAidWidget,  # Use the standard visual aid
+        visual_aid_class=None,  # No visual aid for subtraction
         total_questions=total_questions
     )
 
