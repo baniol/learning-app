@@ -3,7 +3,7 @@ Centralized styling for the quiz application.
 This module contains all the styles used in the application to make them easy to modify.
 """
 from .constants import WINDOW_TITLE, CORRECT_FEEDBACK, INCORRECT_FEEDBACK_SHORT
-from .mappings import MENU_ITEMS, QUIZ_TYPE_MAP, DEFAULT_QUIZ_QUESTIONS
+from .mappings import MENU_CATEGORIES, QUIZ_TYPE_MAP, DEFAULT_QUIZ_QUESTIONS
 
 # Debug mode - set to True to show borders during development
 DEBUG_MODE = False
@@ -138,6 +138,7 @@ MAIN_LAYOUT_SPACING = 20
 # Menu layout
 MENU_LAYOUT_SPACING = 20
 MENU_BUTTON_SIZE = (200, 120)  # Minimum width, height
+MENU_BUTTON_ICON_SIZE = (32, 32)  # Icon size for menu buttons
 
 # Quiz layout
 QUIZ_LAYOUT_SPACING = 20
@@ -158,4 +159,59 @@ SCORE_BOX_STYLE = """
     border: 1px solid #888;
     border-radius: 4px;
     background-color: #f0f0f0;
+"""
+
+MAIN_MENU_TITLE_STYLE = """
+    font-size: 28px;
+    font-weight: bold;
+    color: #0D47A1;
+    margin: 20px 0;
+"""
+
+MAIN_MENU_SUBTITLE_STYLE = """
+    font-size: 18px;
+    color: #1976D2;
+    margin: 10px 0;
+"""
+
+SUBMENU_HEADER_STYLE = """
+    font-size: 24px;
+    font-weight: bold;
+    color: #0D47A1;
+    margin: 10px 0;
+"""
+
+SUBMENU_BACK_BUTTON_STYLE = """
+    QPushButton {
+        background-color: #F5F5F5;
+        color: #0D47A1;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+        border: 1px solid #0D47A1;
+        padding: 5px 10px;
+    }
+    QPushButton:hover {
+        background-color: #E0E0E0;
+    }
+    QPushButton:pressed {
+        background-color: #BDBDBD;
+    }
+"""
+
+MENU_BUTTON_DISABLED_STYLE = """
+    QPushButton {
+        background-color: #90CAF9;
+        color: #E1F5FE;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 10px;
+        border: 2px solid #64B5F6;
+    }
+    QPushButton:hover {
+        background-color: #64B5F6;
+    }
+    QPushButton:pressed {
+        background-color: #42A5F5;
+    }
 """ 

@@ -3,15 +3,35 @@ Mapping constants for the quiz application.
 This module contains all mapping dictionaries and lists used for configuration.
 """
 
-# Menu items shown in the main menu
-MENU_ITEMS = [
-    "Mnożenie 2-5",
-    "Dodawanie do 20",
-    "Mnożenie małych liczb",
-    "Odejmowanie od 10-20",
-    "Item 5", 
-    "Item 6"
+# Main menu categories
+MENU_CATEGORIES = [
+    "Math",
+    "Languages",
+    "Settings",
+    "Stats"
 ]
+
+# Submenu items for each category
+SUBMENU_ITEMS = {
+    "Math": [
+        "Mnożenie 2-5",
+        "Dodawanie do 20",
+        "Mnożenie małych liczb",
+        "Odejmowanie od 10-20"
+    ],
+    "Languages": [
+        "English Words",
+        "Spanish Words",
+    ],
+    "Settings": [
+        "Preferences",
+        "Themes",
+    ],
+    "Stats": [
+        "Progress",
+        "History",
+    ]
+}
 
 # Maps menu item names to quiz class names
 QUIZ_TYPE_MAP = {

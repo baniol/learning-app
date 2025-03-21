@@ -4,7 +4,7 @@ This module contains all string constants used in the application.
 """
 
 
-WINDOW_TITLE = "Math Quiz"
+WINDOW_TITLE = "Learning Quizzes"
 
 PROGRESS_LABEL_TEXT = "Pytanie {}/{}"
 SCORE_LABEL_TEXT = "Wynik:"
