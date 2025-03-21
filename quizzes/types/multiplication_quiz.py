@@ -20,6 +20,12 @@ class MultiplicationQuiz(BaseQuiz):
         # Add navigation bar
         self.nav_bar = NavigationBar(self.return_to_menu)
         
+        # Add input mode toggle
+        self.input_mode_toggle = self.nav_bar.add_input_mode_toggle(
+            checked=False,
+            callback=self.toggle_input_mode
+        )
+        
         # Add spinbox for number of questions if enabled
         if show_questions_control:
             self.questions_spinbox = self.nav_bar.add_questions_spinbox(

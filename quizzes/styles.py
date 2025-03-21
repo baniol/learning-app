@@ -31,6 +31,38 @@ ANSWER_BUTTON_STYLE = """
     }
 """
 
+ANSWER_INPUT_STYLE = """
+    QLineEdit {
+        background-color: white;
+        color: #333;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 10px;
+        border: 2px solid #2d5bb9;
+        padding: 5px 10px;
+    }
+    QLineEdit:focus {
+        border: 2px solid #4a86e8;
+    }
+"""
+
+SUBMIT_BUTTON_STYLE = """
+    QPushButton {
+        background-color: #4CAF50;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 10px;
+        border: 2px solid #388E3C;
+    }
+    QPushButton:hover {
+        background-color: #388E3C;
+    }
+    QPushButton:pressed {
+        background-color: #1B5E20;
+    }
+"""
+
 NEXT_BUTTON_STYLE = """
     QPushButton {
         background-color: #FF9800;

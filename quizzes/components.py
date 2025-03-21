@@ -47,6 +47,10 @@ class NavigationBar(QWidget):
         self.layout.addWidget(checkbox)
         return checkbox
         
+    def add_input_mode_toggle(self, checked=False, callback=None):
+        """Add a toggle for switching between button and input mode."""
+        return self.add_checkbox("Input Mode", checked, callback)
+    
     def add_questions_spinbox(self, initial_value=20, min_value=5, max_value=50, callback=None):
         """Add a spin box to select the number of questions."""
         container = QWidget()

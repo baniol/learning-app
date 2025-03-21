@@ -1,15 +1,17 @@
 """
 Base quiz class that provides common functionality for all quizzes.
 """
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar, QGridLayout, QSizePolicy
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar, QGridLayout, QSizePolicy, QLineEdit
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QIntValidator
 import random
 from typing import List, Optional, Callable, Union, Any
 from .styles import (
     QUESTION_LABEL_STYLE, QUESTION_CORRECT_STYLE, QUESTION_INCORRECT_STYLE,
     FEEDBACK_LABEL_STYLE, FEEDBACK_CORRECT_STYLE, FEEDBACK_INCORRECT_STYLE,
     ANSWER_BUTTON_STYLE, NEXT_BUTTON_STYLE, MAIN_BORDER_STYLE,
-    DEFAULT_SPACING, BUTTON_SPACING, RETURN_BUTTON_STYLE
+    DEFAULT_SPACING, BUTTON_SPACING, RETURN_BUTTON_STYLE,
+    ANSWER_INPUT_STYLE, SUBMIT_BUTTON_STYLE
 )
 from .constants import (
     PROGRESS_LABEL_TEXT, SCORE_LABEL_TEXT, RESULTS_TITLE_TEXT, RESULTS_SCORE_TEXT,
@@ -18,7 +20,6 @@ from .constants import (
     CORRECT_FEEDBACK, INCORRECT_FEEDBACK
 )
 from .mappings import DEFAULT_QUIZ_QUESTIONS
-from PySide6.QtGui import QFont
 from .components import ScoreIndicator
 
 class BaseQuiz(QWidget):
@@ -43,6 +44,7 @@ class BaseQuiz(QWidget):
         self.current_question: int = 0
         self.correct_answers: int = 0
         self.quiz_completed: bool = False
+        self.input_mode = False  # Default to button mode
         
         # Quiz problem state
         self.num1: int = 0
@@ -322,9 +324,11 @@ class BaseQuiz(QWidget):
         pass
     
     def clear_answer_buttons(self) -> None:
-        """Clear all answer buttons from the layout."""
+        """Clear all answer buttons or input fields from the layout."""
         for i in reversed(range(self.answers_layout.count())): 
-            self.answers_layout.itemAt(i).widget().setParent(None)
+            widget = self.answers_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
     
     def generate_answer_options(self) -> List[int]:
         """Generate answer options including the correct answer and distractors.
@@ -346,6 +350,17 @@ class BaseQuiz(QWidget):
         return options
     
     def create_answer_buttons(self, options: List[int]) -> None:
+        """Create buttons for each answer option in a 2x2 grid or input field based on mode.
+        
+        Args:
+            options: List of answer options (integers)
+        """
+        if self.input_mode:
+            self._create_input_field()
+        else:
+            self._create_option_buttons(options)
+
+    def _create_option_buttons(self, options: List[int]) -> None:
         """Create buttons for each answer option in a 2x2 grid.
         
         Args:
@@ -358,17 +373,57 @@ class BaseQuiz(QWidget):
             button.setMinimumHeight(50)
             button.clicked.connect(lambda checked, ans=option: self.check_answer(ans))
             self.answers_layout.addWidget(button, row, col)
-    
+
+    def _create_input_field(self) -> None:
+        """Create an input field and submit button for manual answer entry."""
+        # Create input field
+        self.answer_input = QLineEdit()
+        self.answer_input.setStyleSheet(ANSWER_INPUT_STYLE)
+        self.answer_input.setPlaceholderText("Type your answer...")
+        self.answer_input.setMinimumHeight(50)
+        self.answer_input.setAlignment(Qt.AlignCenter)
+        # Only allow numbers to be entered
+        self.answer_input.setValidator(QIntValidator())
+        # Connect return key to submit answer
+        self.answer_input.returnPressed.connect(self.submit_answer)
+        
+        # Create submit button
+        self.submit_button = QPushButton("Submit")
+        self.submit_button.setStyleSheet(SUBMIT_BUTTON_STYLE)
+        self.submit_button.setMinimumHeight(50)
+        self.submit_button.clicked.connect(self.submit_answer)
+        
+        # Add to layout - one row layout with input field and submit button
+        self.answers_layout.addWidget(self.answer_input, 0, 0)
+        self.answers_layout.addWidget(self.submit_button, 0, 1)
+
+    def submit_answer(self) -> None:
+        """Handle the submit button click in input mode."""
+        # Get the answer from the input field
+        text = self.answer_input.text()
+        if text:
+            try:
+                answer = int(text)
+                self.check_answer(answer)
+            except ValueError:
+                # If not a valid number, show error
+                self.feedback_label.setText("Please enter a valid number")
+                self.feedback_label.setStyleSheet(FEEDBACK_INCORRECT_STYLE)
+
     def check_answer(self, selected_answer: int) -> None:
         """Check if the selected answer is correct and update the UI accordingly.
         
         Args:
             selected_answer: The answer selected by the user
         """
-        # Disable all answer buttons
-        for i in range(self.answers_layout.count()):
-            button = self.answers_layout.itemAt(i).widget()
-            button.setEnabled(False)
+        # Disable all answer inputs
+        if self.input_mode:
+            self.answer_input.setEnabled(False)
+            self.submit_button.setEnabled(False)
+        else:
+            for i in range(self.answers_layout.count()):
+                button = self.answers_layout.itemAt(i).widget()
+                button.setEnabled(False)
         
         if selected_answer == self.correct_answer:
             self.correct_answers += 1
@@ -447,4 +502,20 @@ class BaseQuiz(QWidget):
         
         # If we're already past the new total, show results
         if self.current_question > self.total_questions and not self.quiz_completed:
-            self.show_results() 
+            self.show_results()
+
+    def toggle_input_mode(self, state):
+        """Toggle between button mode and input field mode.
+        
+        Args:
+            state: Qt.CheckState value (0=unchecked, 2=checked)
+        """
+        # Convert Qt state to boolean (0=False, 2=True)
+        self.input_mode = bool(state)
+        
+        # Regenerate the current question to update the UI
+        # Store current question number
+        current = self.current_question
+        # Reset to regenerate
+        self.current_question = current - 1
+        self.generate_new_question() 

@@ -28,6 +28,12 @@ class AdditionQuiz(BaseQuiz):
             "Pokaż podpowiedź", True, self.toggle_visual_aid
         )
         
+        # Add input mode toggle
+        self.input_mode_toggle = self.nav_bar.add_input_mode_toggle(
+            checked=False,
+            callback=self.toggle_input_mode
+        )
+        
         # Add spinbox for number of questions if enabled
         if show_questions_control:
             self.questions_spinbox = self.nav_bar.add_questions_spinbox(
@@ -49,26 +55,22 @@ class AdditionQuiz(BaseQuiz):
         self.visual_aid = VisualAidWidget(0, 0)
         self.visual_aid_layout.addWidget(self.visual_aid)
         
-        # Add container to main layout
+        # Add to main layout after question but before answers
         self.layout.insertWidget(1, self.visual_aid_container)
         
-        # Ensure initial visibility matches checkbox state
-        self.toggle_visual_aid(self.show_visual_aid_checkbox.isChecked())
+        # Start with a new question
+        self.generate_new_question()
     
     def toggle_visual_aid(self, state):
         """Toggle the visibility of the visual aid."""
-        # Get the current state from the checkbox
-        show_visual_aid = self.show_visual_aid_checkbox.isChecked()
-        
         # Show or hide the container
-        self.visual_aid_container.setVisible(show_visual_aid)
-        
-        # When making visible, ensure it gets proper size
-        if show_visual_aid:
+        if state:
+            self.visual_aid_container.show()
             # Update the visual aid container with the proper height but don't set a fixed height
             # which can cause overlapping issues
             self.visual_aid_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         else:
+            self.visual_aid_container.hide()
             # When hiding, use Ignored policy to completely remove from layout
             self.visual_aid_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
         
