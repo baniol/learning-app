@@ -210,7 +210,12 @@ class BaseQuiz(QWidget):
 
     def return_to_menu(self):
         """Return to the main menu."""
-        self.parent().parent().show_menu()
+        # Find the main window (which should be the top-level parent)
+        main_window = self.window()
+        if main_window and hasattr(main_window, 'show_menu'):
+            main_window.show_menu()
+        else:
+            print("Error: Could not find main window or show_menu method")
 
     def generate_new_question(self):
         """Generate a new question and update the UI."""
@@ -361,4 +366,16 @@ class BaseQuiz(QWidget):
 
     def format_question_with_answer(self):
         """Format the question text with the answer included."""
-        raise NotImplementedError("Subclasses must implement format_question_with_answer") 
+        raise NotImplementedError("Subclasses must implement format_question_with_answer")
+
+    def update_total_questions(self, value):
+        """Update the total number of questions for the quiz."""
+        self.total_questions = value
+        # Update the progress bar range
+        self.progress_bar.setRange(0, value)
+        # Update the label
+        self.progress_label.setText(f"Pytanie {self.current_question}/{self.total_questions}")
+        
+        # If we're already past the new total, show results
+        if self.current_question > self.total_questions and not self.quiz_completed:
+            self.show_results() 

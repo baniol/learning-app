@@ -34,22 +34,6 @@ class MultiplicationQuiz(BaseQuiz):
         self.num1 = random.randint(2, 5)
         self.num2 = random.randint(2, 5)
     
-    def return_to_menu(self):
-        """Return to the main menu."""
-        self.parent().parent().show_menu()
-    
-    def update_total_questions(self, value):
-        """Update the total number of questions for the quiz."""
-        self.total_questions = value
-        # Update the progress bar range
-        self.progress_bar.setRange(0, value)
-        # Update the label
-        self.progress_label.setText(f"Pytanie {self.current_question}/{self.total_questions}")
-        
-        # If we're already past the new total, show results
-        if self.current_question > self.total_questions and not self.quiz_completed:
-            self.show_results()
-    
     def calculate_answer(self):
         """Calculate the product of the two numbers."""
         return self.num1 * self.num2

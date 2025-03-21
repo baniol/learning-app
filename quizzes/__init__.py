@@ -171,22 +171,6 @@ def create_custom_quiz(
                 return question.replace("?", str(self.correct_answer))
             # Default format if none provided
             return f"{self.num1} ? {self.num2} = {self.correct_answer}"
-            
-        def return_to_menu(self):
-            """Return to the main menu."""
-            self.parent().parent().show_menu()
-            
-        def update_total_questions(self, value):
-            """Update the total number of questions for the quiz."""
-            self.total_questions = value
-            # Update the progress bar range
-            self.progress_bar.setRange(0, value)
-            # Update the label
-            self.progress_label.setText(f"Pytanie {self.current_question}/{self.total_questions}")
-            
-            # If we're already past the new total, show results
-            if self.current_question > self.total_questions and not self.quiz_completed:
-                self.show_results()
     
     return CustomQuiz
 

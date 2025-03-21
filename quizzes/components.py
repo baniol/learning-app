@@ -28,7 +28,7 @@ class NavigationBar(QWidget):
         self.setLayout(self.layout)
         
         # Add return button
-        self.return_button = QPushButton("Return to Menu")
+        self.return_button = QPushButton("Start")
         self.return_button.setMinimumSize(150, 30)
         self.return_button.setStyleSheet(RETURN_BUTTON_STYLE)
         self.return_button.clicked.connect(return_callback)
