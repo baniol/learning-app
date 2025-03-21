@@ -2,8 +2,20 @@
 Custom quizzes created using the factory function.
 """
 import random
-from .components import VisualAidWidget
-from . import create_custom_quiz
+from ..components import VisualAidWidget
+
+# Import create_custom_quiz directly from base module's scope
+import sys
+import importlib
+from pathlib import Path
+
+# Get the quizzes module
+quizzes_path = Path(__file__).parent.parent
+if str(quizzes_path) not in sys.path:
+    sys.path.append(str(quizzes_path))
+
+# Import the module that contains create_custom_quiz
+from quizzes.create_quiz_factory import create_custom_quiz
 
 def create_small_multiplication_quiz(total_questions=15):
     """Create a multiplication quiz for numbers 1-5."""

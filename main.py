@@ -1,11 +1,12 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout
 import sys
-from quizzes.multiplication_quiz import MultiplicationQuiz
-from quizzes.addition_quiz import AdditionQuiz
-from quizzes.custom_quizzes import SmallMultiplicationQuiz, SubtractionQuiz
+import quizzes.styles as styles
 from quizzes.menu import MainMenu
 from quizzes.quiz_container import QuizContainer
-import quizzes.styles as styles
+# Import all quiz classes that might be created through QUIZ_TYPE_MAP
+from quizzes.types.multiplication_quiz import MultiplicationQuiz
+from quizzes.types.addition_quiz import AdditionQuiz
+from quizzes.types.custom_quizzes import SmallMultiplicationQuiz, SubtractionQuiz
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -25,18 +26,15 @@ class MainWindow(QMainWindow):
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(styles.MAIN_LAYOUT_MARGINS[0], 0, 
                                            styles.MAIN_LAYOUT_MARGINS[2], styles.MAIN_LAYOUT_MARGINS[3])
-        self.main_layout.setSpacing(0)  # No spacing between main components
+        self.main_layout.setSpacing(0)
         self.central_widget.setLayout(self.main_layout)
 
-        # Create menu and quiz container
         self.menu = MainMenu()
         self.quiz_container = QuizContainer()
         
-        # Connect signals
         self.menu.quiz_selected.connect(self.on_quiz_selected)
         self.quiz_container.return_to_menu.connect(self.show_menu)
         
-        # Add to layout
         self.main_layout.addWidget(self.menu, 1)
         self.main_layout.addWidget(self.quiz_container, 1)
         self.quiz_container.hide()

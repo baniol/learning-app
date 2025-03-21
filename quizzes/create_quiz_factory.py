@@ -1,22 +1,10 @@
 """
-Quiz application package.
+Quiz factory functions for creating custom quizzes.
 """
 import random
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel
-from .components import (
-    VisualAidWidget, NavigationBar, Dot, DotsGroup, 
-    SubtractionVisualAidWidget
-)
 from .base_quiz import BaseQuiz
-from .styles import *
-
-# Import and expose the factory function
-from .create_quiz_factory import create_custom_quiz
-
-# Import quiz types from the types subpackage
-from .types.addition_quiz import AdditionQuiz
-from .types.multiplication_quiz import MultiplicationQuiz
-from .types.custom_quizzes import SmallMultiplicationQuiz, SubtractionQuiz
+from .components import NavigationBar
 
 def create_custom_quiz(
     name,
@@ -178,17 +166,4 @@ def create_custom_quiz(
             # Default format if none provided
             return f"{self.num1} ? {self.num2} = {self.correct_answer}"
     
-    return CustomQuiz
-
-__all__ = [
-    'MultiplicationQuiz', 
-    'AdditionQuiz',
-    'VisualAidWidget',
-    'SubtractionVisualAidWidget',
-    'NavigationBar',
-    'Dot',
-    'DotsGroup',
-    'create_custom_quiz',
-    'SmallMultiplicationQuiz',
-    'SubtractionQuiz'
-] 
+    return CustomQuiz 

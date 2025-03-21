@@ -4,9 +4,9 @@ Addition quiz implementation with visual aids.
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
 import random
-from .base_quiz import BaseQuiz
-from .components import NavigationBar, VisualAidWidget
-from .styles import (
+from ..base_quiz import BaseQuiz
+from ..components import NavigationBar, VisualAidWidget
+from ..styles import (
     DEFAULT_SPACING
 )
 

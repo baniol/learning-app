@@ -2,8 +2,8 @@
 Multiplication quiz implementation.
 """
 import random
-from .base_quiz import BaseQuiz
-from .components import NavigationBar
+from ..base_quiz import BaseQuiz
+from ..components import NavigationBar
 
 class MultiplicationQuiz(BaseQuiz):
     """Quiz for practicing multiplication problems."""
