@@ -20,7 +20,9 @@ quizzes/                  (Core package)
 ├── __init__.py           (Main package initialization)
 ├── base_quiz.py          (Base quiz functionality)
 ├── components.py         (Shared UI components)
-├── styles.py             (Styling constants)
+├── styles.py             (UI styling and colors)
+├── constants.py          (String constants for UI text)
+├── mappings.py           (Menu items and quiz type mappings)
 ├── menu.py               (Menu component)
 ├── quiz_container.py     (Quiz container component)
 ├── create_quiz_factory.py (Factory function for creating quizzes)
@@ -76,7 +78,7 @@ def create_my_new_quiz(total_questions=15):
 MyNewQuiz = create_my_new_quiz()
 ```
 
-Then register it in `quizzes/styles.py`:
+Then register it in `quizzes/mappings.py`:
 
 ```python
 # Add to MENU_ITEMS
@@ -244,13 +246,36 @@ For complete examples, look at:
 
 ## Styling Your Quiz
 
-All styles are defined in `quizzes/styles.py`. You can:
+All visual styles are defined in `quizzes/styles.py`, while text constants are in `quizzes/constants.py` and menu configuration is in `quizzes/mappings.py`. You can:
 
-1. Use existing styles
+1. Use existing styles and constants
 2. Add new styles for your quiz
-3. Override styles for custom components
+3. Add new strings to constants.py if needed
+4. Register your quiz in mappings.py
 
----
+## Using Text Constants
+
+For better organization and to support potential internationalization, all user-facing text strings should be defined in `constants.py`. For example:
+
+```python
+# In quizzes/constants.py
+MY_QUIZ_CORRECT_MESSAGE = "Great job solving the equation!"
+MY_QUIZ_TOOLTIP = "Try the new quiz type"
+```
+
+Then use these constants in your quiz implementation:
+
+```python
+from quizzes.constants import MY_QUIZ_CORRECT_MESSAGE, MY_QUIZ_TOOLTIP
+
+class MyCustomQuiz(BaseQuiz):
+    # ...
+    
+    def show_correct_feedback(self):
+        self.feedback_label.setText(MY_QUIZ_CORRECT_MESSAGE)
+        self.feedback_label.setStyleSheet(FEEDBACK_CORRECT_STYLE)
+        self.feedback_label.show()
+```
 
 ## Best Practices
 
@@ -258,4 +283,5 @@ All styles are defined in `quizzes/styles.py`. You can:
 2. **Test your quiz with edge cases** (zeros, negative numbers, etc.)
 3. **Use visual aids when appropriate** to help students understand concepts
 4. **Follow existing code patterns** for consistency
-5. **Add your quiz to styles.py** to make it appear in the menu 
+5. **Add your quiz to mappings.py** to make it appear in the menu
+6. **Define strings in constants.py** for better organization 

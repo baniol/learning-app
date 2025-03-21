@@ -1,6 +1,8 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout
 import sys
 import quizzes.styles as styles
+from quizzes.constants import WINDOW_TITLE
+from quizzes.mappings import QUIZ_TYPE_MAP, DEFAULT_QUIZ_QUESTIONS
 from quizzes.menu import MainMenu
 from quizzes.quiz_container import QuizContainer
 # Import all quiz classes that might be created through QUIZ_TYPE_MAP
@@ -12,7 +14,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle(styles.WINDOW_TITLE)
+        self.setWindowTitle(WINDOW_TITLE)
         self.setGeometry(styles.WINDOW_INITIAL_POSITION[0], styles.WINDOW_INITIAL_POSITION[1], 
                          styles.WINDOW_INITIAL_SIZE[0], styles.WINDOW_INITIAL_SIZE[1])
         self.setMinimumSize(styles.WINDOW_MINIMUM_SIZE[0], styles.WINDOW_MINIMUM_SIZE[1])
@@ -41,11 +43,11 @@ class MainWindow(QMainWindow):
 
     def on_quiz_selected(self, name):
         """Handle quiz selection from the menu."""
-        quiz_class_name = styles.QUIZ_TYPE_MAP.get(name)
+        quiz_class_name = QUIZ_TYPE_MAP.get(name)
         if quiz_class_name:
             quiz_class = globals()[quiz_class_name]
             quiz = quiz_class(
-                total_questions=styles.DEFAULT_QUIZ_QUESTIONS,
+                total_questions=DEFAULT_QUIZ_QUESTIONS,
                 show_questions_control=False
             )
             self.show_quiz(quiz)

@@ -2,12 +2,13 @@
 Centralized styling for the quiz application.
 This module contains all the styles used in the application to make them easy to modify.
 """
+from .constants import WINDOW_TITLE, CORRECT_FEEDBACK, INCORRECT_FEEDBACK_SHORT
+from .mappings import MENU_ITEMS, QUIZ_TYPE_MAP, DEFAULT_QUIZ_QUESTIONS
 
 # Debug mode - set to True to show borders during development
 DEBUG_MODE = False
 
 # Window settings
-WINDOW_TITLE = "Math Quiz"
 WINDOW_INITIAL_POSITION = (100, 100)
 WINDOW_INITIAL_SIZE = (800, 600)
 WINDOW_MINIMUM_SIZE = (600, 400)
@@ -149,31 +150,6 @@ ANSWER_BUTTON_SIZE = (200, 50)  # Minimum width, height
 # Fixed height values
 VISUAL_AID_HEIGHT = 190  # Fixed height for visual aid container and widget
 NAV_BAR_HEIGHT = 40  # Fixed height for navigation bar
-
-# Quiz options
-DEFAULT_QUIZ_QUESTIONS = 20  # Default number of questions in a quiz
-
-# Text strings
-CORRECT_FEEDBACK = "Super! Dobra robota!"
-INCORRECT_FEEDBACK = "Nie! Poprawna odpowiedź to {}"
-
-# Menu items
-MENU_ITEMS = [
-    "Mnożenie 2-5",
-    "Dodawanie do 20",
-    "Mnożenie małych liczb",
-    "Odejmowanie od 10-20",
-    "Item 5", 
-    "Item 6"
-]
-
-# Quiz type mapping
-QUIZ_TYPE_MAP = {
-    "Mnożenie 2-5": "MultiplicationQuiz",
-    "Dodawanie do 20": "AdditionQuiz",
-    "Mnożenie małych liczb": "SmallMultiplicationQuiz",
-    "Odejmowanie od 10-20": "SubtractionQuiz"
-}
 
 # Score box styles
 SCORE_BOX_WIDTH = 60 

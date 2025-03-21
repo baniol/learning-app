@@ -4,6 +4,7 @@ Menu components for the quiz application.
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton
 from PySide6.QtCore import Signal
 import quizzes.styles as styles
+from quizzes.mappings import MENU_ITEMS, QUIZ_TYPE_MAP
 
 class MainMenu(QWidget):
     """Main menu with quiz selection buttons."""
@@ -21,7 +22,7 @@ class MainMenu(QWidget):
         self.setLayout(self.menu_layout)
         
         # Add buttons to grid (2 rows, 3 columns)
-        for i, item in enumerate(styles.MENU_ITEMS):
+        for i, item in enumerate(MENU_ITEMS):
             button = QPushButton(item)
             button.setMinimumSize(*styles.MENU_BUTTON_SIZE)
             button.setStyleSheet(styles.MENU_BUTTON_STYLE)
@@ -30,7 +31,7 @@ class MainMenu(QWidget):
     
     def on_button_click(self, name):
         """Handle button clicks and emit quiz_selected signal."""
-        if name in styles.QUIZ_TYPE_MAP:
+        if name in QUIZ_TYPE_MAP:
             self.quiz_selected.emit(name)
         else:
             print(f"{name} clicked") 

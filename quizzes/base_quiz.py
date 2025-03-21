@@ -10,13 +10,20 @@ from .styles import (
     ANSWER_BUTTON_STYLE, NEXT_BUTTON_STYLE, MAIN_BORDER_STYLE,
     DEFAULT_SPACING, BUTTON_SPACING, RETURN_BUTTON_STYLE
 )
+from .constants import (
+    PROGRESS_LABEL_TEXT, SCORE_LABEL_TEXT, RESULTS_TITLE_TEXT, RESULTS_SCORE_TEXT,
+    NEW_QUIZ_TOOLTIP, MENU_RETURN_TOOLTIP, NEXT_BUTTON_ICON, RESTART_BUTTON_ICON,
+    HOME_BUTTON_ICON, CORRECT_BUTTON_ICON, MAIN_WINDOW_ERROR,
+    CORRECT_FEEDBACK, INCORRECT_FEEDBACK
+)
+from .mappings import DEFAULT_QUIZ_QUESTIONS
 from PySide6.QtGui import QFont
 from .components import ScoreIndicator
 
 class BaseQuiz(QWidget):
     """Base class for all quizzes with common UI and functionality."""
     
-    def __init__(self, total_questions=20):
+    def __init__(self, total_questions=DEFAULT_QUIZ_QUESTIONS):
         """Initialize the quiz with basic UI components."""
         super().__init__()
         self.setStyleSheet(MAIN_BORDER_STYLE)
@@ -41,11 +48,11 @@ class BaseQuiz(QWidget):
         self.progress_container.setLayout(self.progress_layout)
         
         # Progress bar with label
-        self.progress_label = QLabel(f"Pytanie 0/{self.total_questions}")
+        self.progress_label = QLabel(PROGRESS_LABEL_TEXT.format(0, self.total_questions))
         self.progress_layout.addWidget(self.progress_label)
         
         self.progress_bar = QProgressBar()
-        self.progress_bar.setRange(0, total_questions)
+        self.progress_bar.setRange(0, self.total_questions)
         self.progress_bar.setValue(0)
         self.progress_layout.addWidget(self.progress_bar)
         
@@ -56,7 +63,7 @@ class BaseQuiz(QWidget):
         score_layout.setSpacing(5)
         score_container.setLayout(score_layout)
         
-        score_label = QLabel("Wynik:")
+        score_label = QLabel(SCORE_LABEL_TEXT)
         score_layout.addWidget(score_label)
         
         self.score_indicator = ScoreIndicator()
@@ -112,12 +119,12 @@ class BaseQuiz(QWidget):
         self.next_button_container.setLayout(self.next_button_layout)
         
         # Next question button
-        self.next_button = QPushButton("➡️")  # Right arrow emoji
+        self.next_button = QPushButton(NEXT_BUTTON_ICON)  # Right arrow emoji
         self.next_button.setFixedSize(60, 60)  # Fixed size
         self.next_button.setStyleSheet(NEXT_BUTTON_STYLE)
         self.next_button.setFont(QFont("Arial", 20))  # Adjust font size for the emoji
         self.next_button.clicked.connect(self.on_next_button_click)
-        self.next_button.hide()
+        self.next_button.setEnabled(False)
         self.next_button_layout.addWidget(self.next_button, alignment=Qt.AlignCenter)
         self.interaction_layout.addWidget(self.next_button_container, 1)  # 1 part for button
         
@@ -133,7 +140,7 @@ class BaseQuiz(QWidget):
         # Add some space at the top to center content vertically
         self.results_layout.addStretch(1)
         
-        self.results_title = QLabel("Koniec quizu!")
+        self.results_title = QLabel(RESULTS_TITLE_TEXT)
         self.results_title.setStyleSheet("font-size: 32px; font-weight: bold;")
         self.results_title.setAlignment(Qt.AlignCenter)
         self.results_layout.addWidget(self.results_title)
@@ -150,20 +157,20 @@ class BaseQuiz(QWidget):
         self.results_buttons.setLayout(self.results_buttons_layout)
         
         # Restart button with icon
-        self.restart_button = QPushButton("🔄")  # Restart emoji
+        self.restart_button = QPushButton(RESTART_BUTTON_ICON)  # Restart emoji
         self.restart_button.setMinimumSize(80, 80)
         self.restart_button.setStyleSheet(NEXT_BUTTON_STYLE)
         self.restart_button.setFont(QFont("Arial", 20))
-        self.restart_button.setToolTip("Nowy quiz")
+        self.restart_button.setToolTip(NEW_QUIZ_TOOLTIP)
         self.restart_button.clicked.connect(self.restart_quiz)
         self.results_buttons_layout.addWidget(self.restart_button)
         
         # Home button for returning to menu
-        self.menu_button = QPushButton("🏠")  # Home emoji
+        self.menu_button = QPushButton(HOME_BUTTON_ICON)  # Home emoji
         self.menu_button.setMinimumSize(80, 80)
         self.menu_button.setStyleSheet(RETURN_BUTTON_STYLE)
         self.menu_button.setFont(QFont("Arial", 20))
-        self.menu_button.setToolTip("Powrót do menu")
+        self.menu_button.setToolTip(MENU_RETURN_TOOLTIP)
         self.menu_button.clicked.connect(self.return_to_menu)
         self.results_buttons_layout.addWidget(self.menu_button)
         
@@ -197,7 +204,7 @@ class BaseQuiz(QWidget):
         
         # Reset UI
         self.progress_bar.setValue(0)
-        self.progress_label.setText(f"Pytanie 0/{self.total_questions}")
+        self.progress_label.setText(PROGRESS_LABEL_TEXT.format(0, self.total_questions))
         self.score_indicator.set_score(0, 0)
         
         # Hide results, show quiz UI
@@ -215,14 +222,14 @@ class BaseQuiz(QWidget):
         if main_window and hasattr(main_window, 'show_menu'):
             main_window.show_menu()
         else:
-            print("Error: Could not find main window or show_menu method")
+            print(MAIN_WINDOW_ERROR)
 
     def generate_new_question(self):
         """Generate a new question and update the UI."""
         # Update progress
         self.current_question += 1
         self.progress_bar.setValue(self.current_question)
-        self.progress_label.setText(f"Pytanie {self.current_question}/{self.total_questions}")
+        self.progress_label.setText(PROGRESS_LABEL_TEXT.format(self.current_question, self.total_questions))
         
         # Check if quiz is complete
         if self.current_question > self.total_questions:
@@ -246,9 +253,9 @@ class BaseQuiz(QWidget):
         # Create new answer buttons
         self.create_answer_buttons(options)
         
-        # Hide feedback and next button
+        # Hide feedback and disable next button
         self.feedback_label.setText("")
-        self.next_button.hide()
+        self.next_button.setEnabled(False)
         
         # Additional setup for specific quiz types
         self.on_new_question()
@@ -261,7 +268,11 @@ class BaseQuiz(QWidget):
         score_percent = int((self.correct_answers / self.total_questions) * 100)
         
         # Update results text
-        self.results_score.setText(f"Odpowiedziałeś poprawnie na {self.correct_answers} z {self.total_questions} pytań.\nTwój wynik: {score_percent}%")
+        self.results_score.setText(RESULTS_SCORE_TEXT.format(
+            self.correct_answers, 
+            self.total_questions,
+            score_percent
+        ))
         
         # Set color based on score
         if score_percent >= 80:
@@ -295,30 +306,28 @@ class BaseQuiz(QWidget):
     def generate_answer_options(self):
         """Generate answer options including the correct answer and distractors."""
         options = [self.correct_answer]
-        while len(options) < 4:
-            wrong_answer = self.correct_answer + random.randint(-5, 5)
-            if wrong_answer != self.correct_answer and wrong_answer not in options and wrong_answer > 0:
-                options.append(wrong_answer)
         
+        # Generate 3 additional options (distractors)
+        while len(options) < 4:
+            # Generate a distractor within a reasonable range around the correct answer
+            option = random.randint(max(1, self.correct_answer - 5), self.correct_answer + 5)
+            if option != self.correct_answer and option not in options:
+                options.append(option)
+        
+        # Shuffle options
         random.shuffle(options)
         return options
     
     def create_answer_buttons(self, options):
         """Create buttons for each answer option in a 2x2 grid."""
-        # Clear previous buttons
-        self.clear_answer_buttons()
-        
-        # Create new answer buttons in a grid (2x2)
         for i, option in enumerate(options):
-            row = i // 2  # Integer division for row
-            col = i % 2   # Modulo for column
-            
+            row, col = divmod(i, 2)
             button = QPushButton(str(option))
-            button.setFixedSize(70, 40)  # Smaller fixed size to fit in the fixed-height row
             button.setStyleSheet(ANSWER_BUTTON_STYLE)
+            button.setMinimumHeight(50)
             button.clicked.connect(lambda checked, ans=option: self.check_answer(ans))
             self.answers_layout.addWidget(button, row, col)
-
+    
     def check_answer(self, selected_answer):
         """Check if the selected answer is correct and update the UI accordingly."""
         # Disable all answer buttons
@@ -335,23 +344,23 @@ class BaseQuiz(QWidget):
         # Update score indicator instead of text label
         self.score_indicator.set_score(self.correct_answers, self.current_question)
         
-        # Show next button
+        # Enable next button
+        self.next_button.setEnabled(True)
         if self.current_question >= self.total_questions:
-            self.next_button.setText("✅")
+            self.next_button.setText(CORRECT_BUTTON_ICON)
         else:
-            self.next_button.setText("➡️")
-        self.next_button.show()
+            self.next_button.setText(NEXT_BUTTON_ICON)
     
     def show_correct_feedback(self):
         """Show feedback for a correct answer."""
-        self.feedback_label.setText("Super! Dobra robota!")
+        self.feedback_label.setText(CORRECT_FEEDBACK)
         self.feedback_label.setStyleSheet(FEEDBACK_CORRECT_STYLE)
         self.question_label.setText(self.format_question_with_answer())
         self.question_label.setStyleSheet(QUESTION_CORRECT_STYLE)
     
     def show_incorrect_feedback(self):
         """Show feedback for an incorrect answer."""
-        self.feedback_label.setText(f"Niestety, poprawna odpowiedź to {self.correct_answer}")
+        self.feedback_label.setText(INCORRECT_FEEDBACK.format(self.correct_answer))
         self.feedback_label.setStyleSheet(FEEDBACK_INCORRECT_STYLE)
         self.question_label.setText(self.format_question_with_answer())
         self.question_label.setStyleSheet(QUESTION_INCORRECT_STYLE)
@@ -374,7 +383,7 @@ class BaseQuiz(QWidget):
         # Update the progress bar range
         self.progress_bar.setRange(0, value)
         # Update the label
-        self.progress_label.setText(f"Pytanie {self.current_question}/{self.total_questions}")
+        self.progress_label.setText(PROGRESS_LABEL_TEXT.format(self.current_question, self.total_questions))
         
         # If we're already past the new total, show results
         if self.current_question > self.total_questions and not self.quiz_completed:

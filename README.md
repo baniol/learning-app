@@ -17,7 +17,11 @@ quizzes/                (Core package)
 ├── __init__.py         (Package initialization)
 ├── base_quiz.py        (Base quiz functionality)
 ├── components.py       (UI components)
-├── styles.py           (App styling)
+├── styles.py           (UI styling and colors)
+├── constants.py        (String constants)
+├── mappings.py         (Menu and quiz type mappings)
+├── menu.py             (Menu component)
+├── quiz_container.py   (Quiz container component)
 ├── create_quiz_factory.py (Factory for creating quizzes)
 └── types/              (Quiz implementations)
     ├── addition_quiz.py
@@ -34,6 +38,8 @@ The application is designed with a modular architecture:
 - Specific quiz types (e.g., `AdditionQuiz`, `MultiplicationQuiz`)
 - Reusable UI components (`NavigationBar`, `VisualAidWidget`)
 - `QuizContainer`: Manages the active quiz and handles transitions
+- `constants.py`: Centralized text strings for internationalization
+- `mappings.py`: Configuration of menu items and quiz types
 
 ## Creating a New Quiz
 
