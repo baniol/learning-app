@@ -5,6 +5,7 @@ from quizzes.constants import WINDOW_TITLE
 from quizzes.mappings import QUIZ_TYPE_MAP, DEFAULT_QUIZ_QUESTIONS
 from quizzes.menu import MainMenu
 from quizzes.quiz_container import QuizContainer
+from quizzes.quiz_manager import quiz_manager
 # Import all quiz classes that might be created through QUIZ_TYPE_MAP
 from quizzes.types.multiplication_quiz import MultiplicationQuiz
 from quizzes.types.addition_quiz import AdditionQuiz
@@ -45,12 +46,14 @@ class MainWindow(QMainWindow):
         """Handle quiz selection from the menu."""
         quiz_class_name = QUIZ_TYPE_MAP.get(name)
         if quiz_class_name:
-            quiz_class = globals()[quiz_class_name]
-            quiz = quiz_class(
+            # Use the quiz manager to create the quiz
+            quiz = quiz_manager.create_quiz(
+                quiz_class_name,
                 total_questions=DEFAULT_QUIZ_QUESTIONS,
                 show_questions_control=False
             )
-            self.show_quiz(quiz)
+            if quiz:
+                self.show_quiz(quiz)
 
     def show_quiz(self, quiz):
         """Show the selected quiz."""

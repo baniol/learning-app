@@ -4,6 +4,7 @@ Base quiz class that provides common functionality for all quizzes.
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QProgressBar, QGridLayout, QSizePolicy
 from PySide6.QtCore import Qt
 import random
+from typing import List, Optional, Callable, Union, Any
 from .styles import (
     QUESTION_LABEL_STYLE, QUESTION_CORRECT_STYLE, QUESTION_INCORRECT_STYLE,
     FEEDBACK_LABEL_STYLE, FEEDBACK_CORRECT_STYLE, FEEDBACK_INCORRECT_STYLE,
@@ -21,18 +22,32 @@ from PySide6.QtGui import QFont
 from .components import ScoreIndicator
 
 class BaseQuiz(QWidget):
-    """Base class for all quizzes with common UI and functionality."""
+    """Base class for all quizzes with common UI and functionality.
     
-    def __init__(self, total_questions=DEFAULT_QUIZ_QUESTIONS):
-        """Initialize the quiz with basic UI components."""
+    This class provides the foundation for all quiz types, with shared UI components
+    and logic for handling questions, answers, scoring, and navigation. Specific quiz
+    types should inherit from this class and override the necessary methods.
+    """
+    
+    def __init__(self, total_questions: int = DEFAULT_QUIZ_QUESTIONS):
+        """Initialize the quiz with basic UI components.
+        
+        Args:
+            total_questions: The total number of questions to include in the quiz
+        """
         super().__init__()
         self.setStyleSheet(MAIN_BORDER_STYLE)
         
         # Quiz session state
-        self.total_questions = total_questions
-        self.current_question = 0
-        self.correct_answers = 0
-        self.quiz_completed = False
+        self.total_questions: int = total_questions
+        self.current_question: int = 0
+        self.correct_answers: int = 0
+        self.quiz_completed: bool = False
+        
+        # Quiz problem state
+        self.num1: int = 0
+        self.num2: int = 0
+        self.correct_answer: int = 0
         
         # Main layout
         self.layout = QVBoxLayout()
@@ -40,6 +55,13 @@ class BaseQuiz(QWidget):
         self.layout.setSpacing(DEFAULT_SPACING)
         self.setLayout(self.layout)
         
+        self._create_progress_container()
+        self._create_question_display()
+        self._create_interaction_area()
+        self._create_results_screen()
+    
+    def _create_progress_container(self) -> None:
+        """Create the progress bar and score indicator container."""
         # Progress bar
         self.progress_container = QWidget()
         self.progress_container.setFixedHeight(50)
@@ -72,7 +94,9 @@ class BaseQuiz(QWidget):
         self.progress_layout.addWidget(score_container)
         
         self.layout.addWidget(self.progress_container)
-        
+    
+    def _create_question_display(self) -> None:
+        """Create the question display area."""
         # Question label (with stretch to adapt to window height)
         self.question_label = QLabel()
         self.question_label.setStyleSheet(QUESTION_LABEL_STYLE)
@@ -81,7 +105,9 @@ class BaseQuiz(QWidget):
         # Allow question label to expand vertically when window is resized
         self.question_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.layout.addWidget(self.question_label)
-        
+    
+    def _create_interaction_area(self) -> None:
+        """Create the interaction area with answer buttons, feedback, and next button."""
         # Create a single row widget with 3 columns for answers, feedback, and next button
         self.interaction_widget = QWidget()
         # Fix the height of the interaction widget
@@ -130,7 +156,9 @@ class BaseQuiz(QWidget):
         
         # Add the interaction widget to the main layout
         self.layout.addWidget(self.interaction_widget)
-        
+    
+    def _create_results_screen(self) -> None:
+        """Create the results screen shown at the end of the quiz."""
         # Results widget (initially hidden)
         self.results_widget = QWidget()
         self.results_layout = QVBoxLayout()
@@ -182,20 +210,15 @@ class BaseQuiz(QWidget):
         # Add the results widget to the main layout (initially hidden)
         self.layout.addWidget(self.results_widget)
         self.results_widget.hide()
-        
-        # Initialize quiz state
-        self.num1 = 0
-        self.num2 = 0
-        self.correct_answer = 0
 
-    def on_next_button_click(self):
+    def on_next_button_click(self) -> None:
         """Handle next button click based on quiz state."""
         if self.quiz_completed:
             self.restart_quiz()
         else:
             self.generate_new_question()
 
-    def restart_quiz(self):
+    def restart_quiz(self) -> None:
         """Restart the quiz with a new set of questions."""
         # Reset quiz state
         self.current_question = 0
@@ -215,7 +238,7 @@ class BaseQuiz(QWidget):
         # Generate first question
         self.generate_new_question()
 
-    def return_to_menu(self):
+    def return_to_menu(self) -> None:
         """Return to the main menu."""
         # Find the main window (which should be the top-level parent)
         main_window = self.window()
@@ -224,7 +247,7 @@ class BaseQuiz(QWidget):
         else:
             print(MAIN_WINDOW_ERROR)
 
-    def generate_new_question(self):
+    def generate_new_question(self) -> None:
         """Generate a new question and update the UI."""
         # Update progress
         self.current_question += 1
@@ -260,7 +283,7 @@ class BaseQuiz(QWidget):
         # Additional setup for specific quiz types
         self.on_new_question()
     
-    def show_results(self):
+    def show_results(self) -> None:
         """Show the quiz results."""
         self.quiz_completed = True
         
@@ -289,22 +312,26 @@ class BaseQuiz(QWidget):
         # Show results
         self.results_widget.show()
     
-    def generate_numbers(self):
+    def generate_numbers(self) -> None:
         """Generate random numbers for the question. Override in subclasses if needed."""
         self.num1 = random.randint(1, 10)
         self.num2 = random.randint(1, 10)
     
-    def on_new_question(self):
+    def on_new_question(self) -> None:
         """Hook for subclasses to perform additional setup after generating a new question."""
         pass
     
-    def clear_answer_buttons(self):
+    def clear_answer_buttons(self) -> None:
         """Clear all answer buttons from the layout."""
         for i in reversed(range(self.answers_layout.count())): 
             self.answers_layout.itemAt(i).widget().setParent(None)
     
-    def generate_answer_options(self):
-        """Generate answer options including the correct answer and distractors."""
+    def generate_answer_options(self) -> List[int]:
+        """Generate answer options including the correct answer and distractors.
+        
+        Returns:
+            List of answer options (integers)
+        """
         options = [self.correct_answer]
         
         # Generate 3 additional options (distractors)
@@ -318,8 +345,12 @@ class BaseQuiz(QWidget):
         random.shuffle(options)
         return options
     
-    def create_answer_buttons(self, options):
-        """Create buttons for each answer option in a 2x2 grid."""
+    def create_answer_buttons(self, options: List[int]) -> None:
+        """Create buttons for each answer option in a 2x2 grid.
+        
+        Args:
+            options: List of answer options (integers)
+        """
         for i, option in enumerate(options):
             row, col = divmod(i, 2)
             button = QPushButton(str(option))
@@ -328,8 +359,12 @@ class BaseQuiz(QWidget):
             button.clicked.connect(lambda checked, ans=option: self.check_answer(ans))
             self.answers_layout.addWidget(button, row, col)
     
-    def check_answer(self, selected_answer):
-        """Check if the selected answer is correct and update the UI accordingly."""
+    def check_answer(self, selected_answer: int) -> None:
+        """Check if the selected answer is correct and update the UI accordingly.
+        
+        Args:
+            selected_answer: The answer selected by the user
+        """
         # Disable all answer buttons
         for i in range(self.answers_layout.count()):
             button = self.answers_layout.itemAt(i).widget()
@@ -351,34 +386,59 @@ class BaseQuiz(QWidget):
         else:
             self.next_button.setText(NEXT_BUTTON_ICON)
     
-    def show_correct_feedback(self):
+    def show_correct_feedback(self) -> None:
         """Show feedback for a correct answer."""
         self.feedback_label.setText(CORRECT_FEEDBACK)
         self.feedback_label.setStyleSheet(FEEDBACK_CORRECT_STYLE)
         self.question_label.setText(self.format_question_with_answer())
         self.question_label.setStyleSheet(QUESTION_CORRECT_STYLE)
     
-    def show_incorrect_feedback(self):
+    def show_incorrect_feedback(self) -> None:
         """Show feedback for an incorrect answer."""
         self.feedback_label.setText(INCORRECT_FEEDBACK.format(self.correct_answer))
         self.feedback_label.setStyleSheet(FEEDBACK_INCORRECT_STYLE)
         self.question_label.setText(self.format_question_with_answer())
         self.question_label.setStyleSheet(QUESTION_INCORRECT_STYLE)
 
-    def calculate_answer(self):
-        """Calculate the correct answer based on the generated numbers."""
+    def calculate_answer(self) -> int:
+        """Calculate the correct answer based on the generated numbers.
+        
+        Returns:
+            The correct answer for the current question
+        
+        Raises:
+            NotImplementedError: Subclasses must implement this method
+        """
         raise NotImplementedError("Subclasses must implement calculate_answer")
 
-    def format_question(self):
-        """Format the question text."""
+    def format_question(self) -> str:
+        """Format the question text.
+        
+        Returns:
+            Formatted question text
+            
+        Raises:
+            NotImplementedError: Subclasses must implement this method
+        """
         raise NotImplementedError("Subclasses must implement format_question")
 
-    def format_question_with_answer(self):
-        """Format the question text with the answer included."""
+    def format_question_with_answer(self) -> str:
+        """Format the question text with the answer included.
+        
+        Returns:
+            Formatted question text with answer
+            
+        Raises:
+            NotImplementedError: Subclasses must implement this method
+        """
         raise NotImplementedError("Subclasses must implement format_question_with_answer")
 
-    def update_total_questions(self, value):
-        """Update the total number of questions for the quiz."""
+    def update_total_questions(self, value: int) -> None:
+        """Update the total number of questions for the quiz.
+        
+        Args:
+            value: New total number of questions
+        """
         self.total_questions = value
         # Update the progress bar range
         self.progress_bar.setRange(0, value)
