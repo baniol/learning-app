@@ -12,7 +12,8 @@ from .styles import (
     EXPLANATION_LABEL_STYLE, DEFAULT_SPACING, DOTS_ROW_SIZE,
     NAV_BAR_BORDER_STYLE, RETURN_BUTTON_STYLE,
     VISUAL_AID_HEIGHT, SCORE_GOOD_COLOR, SCORE_BAD_COLOR,
-    SCORE_BOX_WIDTH, SCORE_BOX_HEIGHT, SCORE_BOX_STYLE
+    SCORE_BOX_WIDTH, SCORE_BOX_HEIGHT, SCORE_BOX_STYLE,
+    SUBMENU_BACK_BUTTON_STYLE
 )
 
 class NavigationBar(QWidget):
@@ -28,9 +29,9 @@ class NavigationBar(QWidget):
         self.setLayout(self.layout)
         
         # Add return button
-        self.return_button = QPushButton("Start")
+        self.return_button = QPushButton("← Back")
         self.return_button.setMinimumSize(150, 30)
-        self.return_button.setStyleSheet(RETURN_BUTTON_STYLE)
+        self.return_button.setStyleSheet(SUBMENU_BACK_BUTTON_STYLE)
         self.return_button.clicked.connect(return_callback)
         self.layout.addWidget(self.return_button)
         
