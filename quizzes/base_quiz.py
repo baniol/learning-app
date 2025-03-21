@@ -21,6 +21,8 @@ from .constants import (
 )
 from .mappings import DEFAULT_QUIZ_QUESTIONS
 from .components import ScoreIndicator
+# Import database module for score saving
+from .database.scores import save_score
 
 class BaseQuiz(QWidget):
     """Base class for all quizzes with common UI and functionality.
@@ -306,6 +308,10 @@ class BaseQuiz(QWidget):
             self.results_score.setStyleSheet("font-size: 20px; color: orange;")
         else:
             self.results_score.setStyleSheet("font-size: 20px; color: red;")
+        
+        # Save score to database
+        quiz_type = self.__class__.__name__
+        save_score(quiz_type, self.correct_answers, self.total_questions)
         
         # Hide quiz UI elements
         self.question_label.hide()

@@ -2,7 +2,7 @@
 Custom quizzes created using the factory function.
 """
 import random
-from ..components import VisualAidWidget
+from ..components.visual_aid import VisualAidWidget, SubtractionVisualAidWidget
 
 # Import create_custom_quiz directly from base module's scope
 import sys

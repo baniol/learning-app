@@ -3,11 +3,6 @@ Quiz application package.
 """
 import random
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel
-# Import from original components.py file
-from .components import (
-    VisualAidWidget, NavigationBar, Dot, DotsGroup, 
-    SubtractionVisualAidWidget
-)
 from .base_quiz import BaseQuiz
 from .styles import *
 

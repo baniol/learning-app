@@ -4,7 +4,7 @@ Quiz factory functions for creating custom quizzes.
 import random
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel
 from .base_quiz import BaseQuiz
-from .components import NavigationBar
+from .components.navigation_bar import NavigationBar
 
 def create_custom_quiz(
     name,

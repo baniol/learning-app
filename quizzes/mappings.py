@@ -30,6 +30,7 @@ SUBMENU_ITEMS = {
     "Stats": [
         "Progress",
         "History",
+        "Scores"
     ]
 }
 

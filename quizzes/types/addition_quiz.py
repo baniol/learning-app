@@ -5,7 +5,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
 import random
 from ..base_quiz import BaseQuiz
-from ..components import NavigationBar, VisualAidWidget
+from ..components import NavigationBar
+from ..components.visual_aid import VisualAidWidget
 from ..styles import (
     DEFAULT_SPACING
 )

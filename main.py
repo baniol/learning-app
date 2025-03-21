@@ -10,6 +10,8 @@ from quizzes.quiz_manager import quiz_manager
 from quizzes.types.multiplication_quiz import MultiplicationQuiz
 from quizzes.types.addition_quiz import AdditionQuiz
 from quizzes.types.custom_quizzes import SmallMultiplicationQuiz, SubtractionQuiz
+# Import scores page
+from quizzes.scores_page import ScoresPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -34,16 +36,26 @@ class MainWindow(QMainWindow):
 
         self.menu = MainMenu()
         self.quiz_container = QuizContainer()
+        self.scores_page = ScoresPage()
         
         self.menu.quiz_selected.connect(self.on_quiz_selected)
         self.quiz_container.return_to_menu.connect(self.show_menu)
+        self.scores_page.return_to_menu.connect(self.show_menu)
         
         self.main_layout.addWidget(self.menu, 1)
         self.main_layout.addWidget(self.quiz_container, 1)
+        self.main_layout.addWidget(self.scores_page, 1)
+        
         self.quiz_container.hide()
+        self.scores_page.hide()
 
     def on_quiz_selected(self, name):
         """Handle quiz selection from the menu."""
+        # Special case for Scores
+        if name == "Scores":
+            self.show_scores()
+            return
+
         quiz_class_name = QUIZ_TYPE_MAP.get(name)
         if quiz_class_name:
             # Use the quiz manager to create the quiz
@@ -59,11 +71,20 @@ class MainWindow(QMainWindow):
         """Show the selected quiz."""
         self.quiz_container.set_quiz(quiz)
         self.menu.hide()
+        self.scores_page.hide()
         self.quiz_container.show()
+
+    def show_scores(self):
+        """Show the scores page."""
+        self.scores_page.refresh()
+        self.menu.hide()
+        self.quiz_container.hide()
+        self.scores_page.show()
 
     def show_menu(self):
         """Return to the main menu."""
         self.quiz_container.hide()
+        self.scores_page.hide()
         self.menu.show()
 
 if __name__ == "__main__":
