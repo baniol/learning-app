@@ -58,9 +58,6 @@ class AdditionQuiz(BaseQuiz):
         
         # Add to main layout after question but before answers
         self.layout.insertWidget(1, self.visual_aid_container)
-        
-        # Start with a new question
-        self.generate_new_question()
     
     def toggle_visual_aid(self, state):
         """Toggle the visibility of the visual aid."""

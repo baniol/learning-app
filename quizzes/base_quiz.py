@@ -232,7 +232,7 @@ class BaseQuiz(QWidget):
         # Reset UI
         self.progress_bar.setValue(0)
         self.progress_label.setText(PROGRESS_LABEL_TEXT.format(0, self.total_questions))
-        self.score_indicator.set_score(0, 0)
+        self.score_indicator.set_score(0, self.total_questions, 0)
         
         # Hide results, show quiz UI
         self.results_widget.hide()
@@ -438,7 +438,7 @@ class BaseQuiz(QWidget):
             self.show_incorrect_feedback()
         
         # Update score indicator instead of text label
-        self.score_indicator.set_score(self.correct_answers, self.current_question)
+        self.score_indicator.set_score(self.correct_answers, self.total_questions, self.current_question)
         
         # Enable next button
         self.next_button.setEnabled(True)
