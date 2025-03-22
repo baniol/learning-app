@@ -39,7 +39,8 @@ QUIZ_TYPE_MAP = {
     "Mnożenie 2-5": "MultiplicationQuiz",
     "Dodawanie do 20": "AdditionQuiz",
     "Mnożenie małych liczb": "SmallMultiplicationQuiz",
-    "Odejmowanie od 10-20": "SubtractionQuiz"
+    "Odejmowanie od 10-20": "SubtractionQuiz",
+    "Scores": "Scores"  # Special case for the scores page
 }
 
 # Quiz configuration parameters
