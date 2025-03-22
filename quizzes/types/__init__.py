@@ -9,11 +9,14 @@ from .quiz_types import (
     SubtractionQuiz,
     DivisionQuiz
 )
+from .file_based_quiz import FileBasedQuiz, create_quiz_from_file
 
 __all__ = [
     'AdditionQuiz',
     'MultiplicationQuiz',
     'SmallMultiplicationQuiz',
     'SubtractionQuiz',
-    'DivisionQuiz'
+    'DivisionQuiz',
+    'FileBasedQuiz',
+    'create_quiz_from_file'
 ] 

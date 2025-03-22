@@ -94,16 +94,15 @@ class QuizManager:
         
         This lazy loads the quiz classes when first needed.
         """
+        # Import quiz types
         from .types import (
             AdditionQuiz,
             MultiplicationQuiz,
             SmallMultiplicationQuiz,
             SubtractionQuiz,
-            DivisionQuiz
+            DivisionQuiz,
+            create_quiz_from_file
         )
-        
-        # Import file-based quiz functionality
-        from .file_based_quiz import create_quiz_from_file
         
         # Register by class name (as defined in QUIZ_TYPE_MAP)
         self.register_quiz("AdditionQuiz", AdditionQuiz)
@@ -112,28 +111,13 @@ class QuizManager:
         self.register_quiz("SubtractionQuiz", SubtractionQuiz)
         self.register_quiz("DivisionQuiz", DivisionQuiz)
         
-        # Register file-based quizzes
-        self.register_quiz("EnglishPolishPhrasalVerbsQuiz", create_quiz_from_file(
-            "quizzes/phrasal_verbs.json", 
-            "English-Polish Phrasal Verbs"
-        ))
-        
-        self.register_quiz("PolishEnglishPhrasalVerbsQuiz", create_quiz_from_file(
-            "quizzes/phrasal_verbs_reverse.json", 
-            "Polish-English Phrasal Verbs"
-        ))
-        
         # Advanced phrasal verbs quiz with input field mode
         self.register_quiz("AdvancedPhrasalVerbsQuiz", create_quiz_from_file(
-            "quizzes/advanced_phrasal_verbs.json", 
+            "quizz_data/advanced_phrasal_verbs.json", 
             "Advanced Phrasal Verbs",
             input_mode=True  # Use input field mode for this quiz
         ))
-        
-        self.register_quiz("MathMixQuiz", create_quiz_from_file(
-            "quizzes/math_quiz.json",
-            "Mixed Math Quiz"
-        ))
+    
         
         self._loaded = True
 

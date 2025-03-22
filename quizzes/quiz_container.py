@@ -3,7 +3,7 @@ Quiz container for displaying active quizzes.
 """
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Signal
-from .new_components.base_component import BaseComponent
+from .components import BaseComponent
 from .styles import QUIZ_CONTAINER_BORDER_STYLE
 
 class QuizContainer(BaseComponent):

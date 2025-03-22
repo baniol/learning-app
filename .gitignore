@@ -51,3 +51,5 @@ quiz_data.db
 *.moc.cpp
 *.ui.h
 *.ui.cpp 
+
+quiz_data.db
