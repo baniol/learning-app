@@ -5,9 +5,10 @@ A PySide6-based application for math quizzes targeting elementary school student
 ## Features
 
 - Multiple quiz types (addition, multiplication, etc.)
-- Visual aids to help understand concepts
 - Responsive UI that works across different screen sizes
 - Customizable number of questions
+- User management system
+- Score tracking
 
 ## Project Structure
 
@@ -18,6 +19,7 @@ quizzes/                (Core package)
 ├── base_quiz.py        (Base quiz functionality)
 ├── components/         (UI components directory)
 │   ├── __init__.py     (Components initialization)
+│   ├── base_component.py (Base component class)
 │   ├── navigation_bar.py (Navigation bar component)
 │   ├── top_bar.py      (Top bar component)
 │   └── score_indicator.py (Score indicator component)
@@ -28,20 +30,22 @@ quizzes/                (Core package)
 ├── menu.py             (Menu component)
 ├── quiz_container.py   (Quiz container component)
 ├── create_quiz_factory.py (Factory for creating quizzes)
+├── quiz_manager.py     (Quiz management singleton)
 ├── user_manager.py     (User management functionality)
+├── database/           (Database functionality)
 └── types/              (Quiz implementations)
-    ├── addition_quiz.py
-    ├── multiplication_quiz.py
-    └── custom_quizzes.py
-requirements.txt        (Dependencies)
+    ├── __init__.py     (Quiz type exports)
+    └── quiz_types.py   (Consolidated quiz implementations)
 ```
 
 ## Architecture
 
 The application is designed with a modular architecture:
 
-- `BaseQuiz`: Abstract base class that all quizzes inherit from
+- `BaseQuiz`: Base class that all quizzes inherit from
+- `BaseComponent`: Base class for UI components to standardize creation
 - `Components`: Reusable UI components (TopBar, NavigationBar, ScoreIndicator)
+- `QuizManager`: Centralized quiz registration and creation
 - `UserManager`: Handles user-related functionality and state
 - `QuizContainer`: Manages the active quiz and handles transitions
 - `debug.py`: Centralized debug logging functionality
@@ -50,7 +54,7 @@ The application is designed with a modular architecture:
 
 ## Creating a New Quiz
 
-Please refer to the `CreateQuiz.md` file for detailed instructions on how to create new quiz types.
+Please refer to the `CREATING_QUIZZES.md` file for instructions on how to create new quiz types in the simplified structure. For legacy documentation, see `CreateQuiz.md` (deprecated).
 
 ## Debugging
 
@@ -91,8 +95,19 @@ python main.py
 
 ```bash
 # Install development dependencies
-pip install -r dev-requirements.txt
+pip install -r requirements-dev.txt
 
 # Run linting
 flake8
 ```
+
+## Simplification
+
+This project has undergone simplification to improve maintainability and reduce complexity:
+
+1. Removed visual aid components
+2. Consolidated quiz type implementations
+3. Streamlined component architecture
+4. Simplified quiz creation process
+
+See `SIMPLIFICATIONS.md` for detailed information about these changes.

@@ -1,4 +1,6 @@
-# Creating New Quizzes
+# [DEPRECATED] Creating New Quizzes
+
+> ⚠️ **IMPORTANT**: This documentation is now deprecated. Please refer to [CREATING_QUIZZES.md](CREATING_QUIZZES.md) for the updated guide that reflects the simplified architecture without visual aids.
 
 This guide explains how to create new quiz types for the math quiz application.
 
