@@ -13,7 +13,8 @@ def create_custom_quiz(
     number_generator,
     answer_calculator,
     question_formatter=None,
-    total_questions=20
+    total_questions=20,
+    input_mode=None
 ):
     """Create a custom quiz with minimal code.
     
@@ -23,6 +24,10 @@ def create_custom_quiz(
         answer_calculator: Function that takes quiz as argument and returns the answer
         question_formatter: Function that takes quiz as argument and returns question text
         total_questions: Default number of questions
+        input_mode: If provided, fixes the input mode:
+                   - True: use input field mode
+                   - False: use buttons mode 
+                   - "self_assess": use self-assessment mode with reveal button
         
     Returns:
         A custom quiz class that can be instantiated
@@ -41,7 +46,8 @@ def create_custom_quiz(
             super().__init__(
                 parent=parent,
                 total_questions=total_questions,
-                show_questions_control=show_questions_control
+                show_questions_control=show_questions_control,
+                input_mode=input_mode
             )
             self.quiz_name = name
             
@@ -55,11 +61,12 @@ def create_custom_quiz(
                     callback=self.set_total_questions
                 )
             
-            # Add input mode toggle
-            self.input_mode_toggle = self.nav_bar.add_input_mode_toggle(
-                checked=False,
-                callback=self.toggle_input_mode
-            )
+            # Add input mode toggle only if input mode is not fixed
+            if input_mode is None:
+                self.input_mode_toggle = self.nav_bar.add_input_mode_toggle(
+                    checked=False,
+                    callback=self.toggle_input_mode
+                )
                 
             self.main_layout.insertWidget(0, self.nav_bar)
         

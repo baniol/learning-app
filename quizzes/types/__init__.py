@@ -6,12 +6,14 @@ from .quiz_types import (
     AdditionQuiz,
     MultiplicationQuiz,
     SmallMultiplicationQuiz,
-    SubtractionQuiz
+    SubtractionQuiz,
+    DivisionQuiz
 )
 
 __all__ = [
     'AdditionQuiz',
     'MultiplicationQuiz',
     'SmallMultiplicationQuiz',
-    'SubtractionQuiz'
+    'SubtractionQuiz',
+    'DivisionQuiz'
 ] 

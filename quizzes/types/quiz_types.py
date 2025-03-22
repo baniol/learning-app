@@ -10,22 +10,24 @@ from ..create_quiz_factory import create_custom_quiz
 class AdditionQuiz(BaseQuiz):
     """Quiz for practicing addition problems."""
     
-    def __init__(self, parent=None, total_questions=10, show_questions_control=True):
+    def __init__(self, parent=None, total_questions=10, show_questions_control=True, input_mode=None):
         """Initialize the addition quiz."""
         super().__init__(
             parent=parent,
             total_questions=total_questions,
-            show_questions_control=show_questions_control
+            show_questions_control=show_questions_control,
+            input_mode=input_mode
         )
         
         # Add navigation bar
         self.nav_bar = NavigationBar(self.return_to_menu)
         
-        # Add input mode toggle
-        self.input_mode_toggle = self.nav_bar.add_input_mode_toggle(
-            checked=False,
-            callback=self.toggle_input_mode
-        )
+        # Add input mode toggle only if input mode is not fixed
+        if input_mode is None:
+            self.input_mode_toggle = self.nav_bar.add_input_mode_toggle(
+                checked=False,
+                callback=self.toggle_input_mode
+            )
         
         # Add spinbox for number of questions if enabled
         if show_questions_control:
@@ -60,22 +62,27 @@ class AdditionQuiz(BaseQuiz):
 class MultiplicationQuiz(BaseQuiz):
     """Quiz for practicing multiplication problems."""
     
-    def __init__(self, parent=None, total_questions=20, show_questions_control=True):
-        """Initialize the multiplication quiz."""
+    def __init__(self, parent=None, total_questions=20, show_questions_control=True, input_mode="self_assess"):
+        """Initialize the multiplication quiz.
+        
+        By default, uses self-assessment mode where users reveal the answer and self-evaluate.
+        """
         super().__init__(
             parent=parent,
             total_questions=total_questions,
-            show_questions_control=show_questions_control
+            show_questions_control=show_questions_control,
+            input_mode=input_mode
         )
         
         # Add navigation bar
         self.nav_bar = NavigationBar(self.return_to_menu)
         
-        # Add input mode toggle
-        self.input_mode_toggle = self.nav_bar.add_input_mode_toggle(
-            checked=False,
-            callback=self.toggle_input_mode
-        )
+        # Add input mode toggle only if input mode is not fixed
+        if input_mode is None:
+            self.input_mode_toggle = self.nav_bar.add_input_mode_toggle(
+                checked=False,
+                callback=self.toggle_input_mode
+            )
         
         # Add spinbox for number of questions if enabled
         if show_questions_control:
@@ -122,13 +129,14 @@ def create_small_multiplication_quiz():
         """Format the multiplication question."""
         return f"{quiz.num1} × {quiz.num2} = ?"
     
-    # Create the quiz class
+    # Create the quiz class with input mode set to True (input field)
     return create_custom_quiz(
         name="Mnożenie małych liczb",
         number_generator=generate_numbers,
         answer_calculator=calculate_answer,
         question_formatter=format_question,
-        total_questions=15
+        total_questions=15,
+        input_mode=True  # Use input field instead of buttons
     )
 
 def create_subtraction_quiz():
@@ -147,15 +155,48 @@ def create_subtraction_quiz():
         """Format the subtraction question."""
         return f"{quiz.num1} - {quiz.num2} = ?"
     
-    # Create the quiz class
+    # Create the quiz class with input mode set to False (buttons)
     return create_custom_quiz(
         name="Odejmowanie od 10-20",
         number_generator=generate_numbers,
         answer_calculator=calculate_answer,
         question_formatter=format_question,
-        total_questions=15
+        total_questions=15,
+        input_mode=False  # Use buttons instead of input field
+    )
+
+def create_division_quiz():
+    """Create a division quiz with self-assessment mode."""
+    
+    def generate_numbers(quiz):
+        """Generate numbers for division that result in whole numbers."""
+        # First generate the answer (quotient) between 1 and 10
+        quotient = random.randint(1, 10)
+        # Then generate the divisor between 2 and 10
+        divisor = random.randint(2, 10)
+        # Calculate the dividend to ensure whole number answers
+        quiz.num1 = quotient * divisor  # dividend
+        quiz.num2 = divisor             # divisor
+    
+    def calculate_answer(quiz):
+        """Calculate the quotient."""
+        return quiz.num1 // quiz.num2
+    
+    def format_question(quiz):
+        """Format the division question."""
+        return f"{quiz.num1} ÷ {quiz.num2} = ?"
+    
+    # Create the quiz class with self-assessment mode
+    return create_custom_quiz(
+        name="Division Practice",
+        number_generator=generate_numbers,
+        answer_calculator=calculate_answer,
+        question_formatter=format_question,
+        total_questions=10,
+        input_mode="self_assess"  # Use self-assessment mode
     )
 
 # Create the quiz classes
 SmallMultiplicationQuiz = create_small_multiplication_quiz()
-SubtractionQuiz = create_subtraction_quiz() 
+SubtractionQuiz = create_subtraction_quiz()
+DivisionQuiz = create_division_quiz() 

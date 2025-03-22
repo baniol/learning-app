@@ -34,13 +34,15 @@ class BaseQuiz(QWidget):
     types should inherit from this class and override the necessary methods.
     """
     
-    def __init__(self, parent=None, total_questions=DEFAULT_QUIZ_QUESTIONS, show_questions_control=True):
+    def __init__(self, parent=None, total_questions=DEFAULT_QUIZ_QUESTIONS, show_questions_control=True, input_mode=None):
         """Initialize the quiz with basic UI components.
         
         Args:
             parent: Parent widget
             total_questions: The total number of questions to include in the quiz
             show_questions_control: Whether to show question control options
+            input_mode: If set to True or False, locks the input mode and hides the toggle
+                        If set to "self_assess", enables self-assessment mode
         """
         super().__init__(parent)
         self.setStyleSheet(MAIN_BORDER_STYLE)
@@ -52,7 +54,21 @@ class BaseQuiz(QWidget):
         self.current_question: int = 0  # Will be set to 1 by next_question
         self.correct_answers: int = 0
         self.quiz_completed: bool = False
+        
+        # Input mode handling
         self.input_mode: bool = False  # Default to button mode
+        self.self_assess_mode: bool = False  # Self-assessment mode flag
+        self.fixed_input_mode: bool = input_mode is not None  # Whether input mode is fixed
+        
+        # Set the input mode based on the parameter
+        if self.fixed_input_mode:
+            if input_mode == "self_assess":
+                self.self_assess_mode = True
+                self.input_mode = False
+            else:
+                self.input_mode = bool(input_mode)
+                self.self_assess_mode = False
+                
         self.show_questions_control: bool = show_questions_control
         self.player_name: str = "Anonymous"  # Default player name
         
@@ -395,7 +411,9 @@ class BaseQuiz(QWidget):
         Args:
             options: List of answer options (integers)
         """
-        if self.input_mode:
+        if self.self_assess_mode:
+            self._create_self_assess_buttons()
+        elif self.input_mode:
             self._create_input_field()
         else:
             self._create_option_buttons(options)
@@ -544,20 +562,28 @@ class BaseQuiz(QWidget):
             self.show_results()
 
     def toggle_input_mode(self, state):
-        """Toggle between button mode and input field mode.
+        """Toggle between button selection mode and direct input mode.
         
         Args:
-            state: Qt.CheckState value (0=unchecked, 2=checked)
+            state: The new state (checked=True means use input mode)
         """
-        # Convert Qt state to boolean (0=False, 2=True)
-        self.input_mode = bool(state)
+        log("BaseQuiz", f"toggle_input_mode called with state: {state}")
         
-        # Regenerate the current question to update the UI
-        # Store current question number
-        current = self.current_question
-        # Reset to regenerate
-        self.current_question = current - 1
-        self.generate_new_question() 
+        # If input mode is fixed at quiz level, do not allow toggling
+        if self.fixed_input_mode:
+            return
+            
+        # Only clear and recreate if this is an actual state change
+        if self.input_mode != bool(state) or self.self_assess_mode:
+            # Clear existing UI
+            self.clear_answer_buttons()
+            
+            # Set the new input mode
+            self.input_mode = bool(state)
+            self.self_assess_mode = False
+            
+            # Refresh the current question with the new mode
+            self.next_question()
 
     def set_player_name(self, name: str) -> None:
         """Set the player name for score recording."""
@@ -590,7 +616,159 @@ class BaseQuiz(QWidget):
         self.score_indicator.set_score(self.correct_answers, self.total_questions, self.current_question)
         
         # Re-enable input for new question
-        if self.input_mode:
+        if self.self_assess_mode:
+            if hasattr(self, 'show_answer_button'):
+                self.show_answer_button.show()
+                self.show_answer_button.setEnabled(True)
+            if hasattr(self, 'thumbs_up_button'):
+                self.thumbs_up_button.hide()
+                self.thumbs_up_button.setEnabled(True)
+            if hasattr(self, 'thumbs_down_button'):
+                self.thumbs_down_button.hide()
+                self.thumbs_down_button.setEnabled(True)
+        elif self.input_mode:
+            if hasattr(self, 'answer_input'):
+                self.answer_input.setEnabled(True)
+                self.answer_input.clear()
+                self.answer_input.setFocus()
+            if hasattr(self, 'submit_button'):
+                self.submit_button.setEnabled(True)
+        
+        # Disable next button until an answer is submitted
+        self.next_button.setEnabled(False)
+        
+        # Clear feedback label
+        self.feedback_label.setText("")
+
+    def _create_self_assess_buttons(self) -> None:
+        """Create a show answer button and thumbs up/down buttons for self-assessment mode."""
+        # Create show answer button
+        self.show_answer_button = QPushButton("Show Answer")
+        self.show_answer_button.setStyleSheet(ANSWER_BUTTON_STYLE)
+        self.show_answer_button.setMinimumHeight(50)
+        self.show_answer_button.clicked.connect(self._reveal_answer)
+        self.answers_layout.addWidget(self.show_answer_button, 0, 0, 1, 2)
+        
+        # Create thumbs up/down buttons (initially hidden)
+        self.thumbs_up_button = QPushButton("👍 Correct")
+        self.thumbs_up_button.setStyleSheet(ANSWER_BUTTON_STYLE + "background-color: #a3e4a3;")
+        self.thumbs_up_button.setMinimumHeight(50)
+        self.thumbs_up_button.clicked.connect(lambda: self._self_assess(True))
+        self.thumbs_up_button.hide()
+        self.answers_layout.addWidget(self.thumbs_up_button, 1, 0)
+        
+        self.thumbs_down_button = QPushButton("👎 Incorrect")
+        self.thumbs_down_button.setStyleSheet(ANSWER_BUTTON_STYLE + "background-color: #e4a3a3;")
+        self.thumbs_down_button.setMinimumHeight(50)
+        self.thumbs_down_button.clicked.connect(lambda: self._self_assess(False))
+        self.thumbs_down_button.hide()
+        self.answers_layout.addWidget(self.thumbs_down_button, 1, 1)
+        
+    def _reveal_answer(self) -> None:
+        """Reveal the answer and show the thumbs up/down buttons."""
+        # Update question label to show answer
+        self.question_label.setText(self.format_question_with_answer())
+        
+        # Hide show answer button
+        self.show_answer_button.hide()
+        
+        # Show thumbs up/down buttons
+        self.thumbs_up_button.show()
+        self.thumbs_down_button.show()
+        
+    def _self_assess(self, correct: bool) -> None:
+        """Handle self-assessment result.
+        
+        Args:
+            correct: Whether the user self-assessed as correct
+        """
+        # Update score if user said they were correct
+        if correct:
+            self.correct_answers += 1
+            self.show_correct_feedback()
+        else:
+            self.show_incorrect_feedback()
+        
+        # Disable assessment buttons
+        self.thumbs_up_button.setEnabled(False)
+        self.thumbs_down_button.setEnabled(False)
+        
+        # Update score indicator
+        self.score_indicator.set_score(self.correct_answers, self.total_questions, self.current_question)
+        
+        # Enable next button
+        self.next_button.setEnabled(True)
+        if self.current_question >= self.total_questions:
+            self.next_button.setText(CORRECT_BUTTON_ICON)
+        else:
+            self.next_button.setText(NEXT_BUTTON_ICON)
+        
+    def toggle_input_mode(self, state):
+        """Toggle between button selection mode and direct input mode.
+        
+        Args:
+            state: The new state (checked=True means use input mode)
+        """
+        log("BaseQuiz", f"toggle_input_mode called with state: {state}")
+        
+        # If input mode is fixed at quiz level, do not allow toggling
+        if self.fixed_input_mode:
+            return
+            
+        # Only clear and recreate if this is an actual state change
+        if self.input_mode != bool(state) or self.self_assess_mode:
+            # Clear existing UI
+            self.clear_answer_buttons()
+            
+            # Set the new input mode
+            self.input_mode = bool(state)
+            self.self_assess_mode = False
+            
+            # Refresh the current question with the new mode
+            self.next_question()
+
+    def set_player_name(self, name: str) -> None:
+        """Set the player name for score recording."""
+        self.player_name = name if name else "Anonymous"
+
+    def init_ui(self):
+        """Initialize additional UI components and setup."""
+        # Additional initialization logic if needed
+        pass
+
+    def next_question(self) -> None:
+        """Show the next question in the quiz sequence or restart if completed."""
+        log("BaseQuiz", f"next_question called, current_question before: {self.current_question}")
+        
+        # If this is the first question of a new quiz (current_question is 0)
+        # Always set it to 1 (not incrementing)
+        if self.current_question == 0:
+            self.current_question = 1
+            log("BaseQuiz", f"Set current_question to: {self.current_question}")
+            # Update UI for question 1
+            self.progress_bar.setValue(1)  
+            log("BaseQuiz", f"Set progress bar to: 1")
+            self.progress_label.setText(PROGRESS_LABEL_TEXT.format(1, self.total_questions))
+            self.generate_new_question()
+        else:
+            # If we've already started, increment and generate
+            self.generate_new_question()
+        
+        # Update score indicator
+        self.score_indicator.set_score(self.correct_answers, self.total_questions, self.current_question)
+        
+        # Re-enable input for new question
+        if self.self_assess_mode:
+            if hasattr(self, 'show_answer_button'):
+                self.show_answer_button.show()
+                self.show_answer_button.setEnabled(True)
+            if hasattr(self, 'thumbs_up_button'):
+                self.thumbs_up_button.hide()
+                self.thumbs_up_button.setEnabled(True)
+            if hasattr(self, 'thumbs_down_button'):
+                self.thumbs_down_button.hide()
+                self.thumbs_down_button.setEnabled(True)
+        elif self.input_mode:
             if hasattr(self, 'answer_input'):
                 self.answer_input.setEnabled(True)
                 self.answer_input.clear()

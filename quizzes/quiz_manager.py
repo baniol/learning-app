@@ -90,7 +90,8 @@ class QuizManager:
             AdditionQuiz,
             MultiplicationQuiz,
             SmallMultiplicationQuiz,
-            SubtractionQuiz
+            SubtractionQuiz,
+            DivisionQuiz
         )
         
         # Register by class name (as defined in QUIZ_TYPE_MAP)
@@ -98,6 +99,7 @@ class QuizManager:
         self.register_quiz("MultiplicationQuiz", MultiplicationQuiz)
         self.register_quiz("SmallMultiplicationQuiz", SmallMultiplicationQuiz)
         self.register_quiz("SubtractionQuiz", SubtractionQuiz)
+        self.register_quiz("DivisionQuiz", DivisionQuiz)
         
         self._loaded = True
 
