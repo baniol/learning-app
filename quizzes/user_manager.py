@@ -2,7 +2,7 @@
 User management module for the quiz application.
 This centralizes all user-related functionality in one place.
 """
-from PySide6.QtWidgets import QMessageBox, QComboBox
+from PySide6.QtWidgets import QMessageBox, QComboBox, QWidget, QHBoxLayout, QLabel
 from PySide6.QtCore import QObject, Signal
 from .database.users import get_all_users, get_user
 from .components.user_dialog import UserDialog
@@ -34,6 +34,49 @@ class UserManager(QObject):
         self.nav_bar = None
         
         log("UserManager", "Initialized")
+    
+    def create_user_selector(self):
+        """
+        Create a widget with a user selection dropdown.
+        
+        Returns:
+            A widget containing the user selection dropdown
+        """
+        # Create container
+        container = QWidget()
+        container_layout = QHBoxLayout()
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(5)
+        container.setLayout(container_layout)
+        
+        # Add label
+        label = QLabel("User:")
+        container_layout.addWidget(label)
+        
+        # Create and populate the combo box
+        self.user_dropdown = QComboBox()
+        self.user_dropdown.setFixedWidth(150)
+        
+        # Populate with users
+        users = get_all_users()
+        current_index = 0
+        
+        for i, user in enumerate(users):
+            self.user_dropdown.addItem(user['display_name'], user['id'])
+            if user['id'] == self.current_user_id:
+                current_index = i
+        
+        # Add a special item for adding a new user
+        self.user_dropdown.addItem("+ Add New User", -1)
+        
+        # Set current user
+        self.user_dropdown.setCurrentIndex(current_index)
+        
+        # Connect signal
+        self.user_dropdown.currentIndexChanged.connect(self.on_user_changed)
+        
+        container_layout.addWidget(self.user_dropdown)
+        return container
     
     def setup_navigation_bar(self, return_callback=None):
         """

@@ -8,7 +8,7 @@ from ..styles import (
     SCORE_GOOD_COLOR, SCORE_BAD_COLOR,
     SCORE_BOX_WIDTH, SCORE_BOX_HEIGHT, SCORE_BOX_STYLE
 )
-from ..new_components.base_component import BaseComponent
+from .base_component import BaseComponent
 
 class ScoreIndicator(BaseComponent):
     """Visual indicator for quiz score showing a colored box with score percentage."""

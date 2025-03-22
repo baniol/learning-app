@@ -13,6 +13,13 @@ WINDOW_INITIAL_POSITION = (100, 100)
 WINDOW_INITIAL_SIZE = (800, 600)
 WINDOW_MINIMUM_SIZE = (600, 400)
 
+# App title style
+APP_TITLE_STYLE = """
+    font-size: 18px; 
+    font-weight: bold;
+    color: #2d5bb9;
+"""
+
 # Button styles
 ANSWER_BUTTON_STYLE = """
     QPushButton {

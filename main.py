@@ -7,9 +7,12 @@ from quizzes.menu import MainMenu
 from quizzes.quiz_container import QuizContainer
 from quizzes.quiz_manager import quiz_manager
 # Import all quiz classes that might be created through QUIZ_TYPE_MAP
-from quizzes.types.multiplication_quiz import MultiplicationQuiz
-from quizzes.types.addition_quiz import AdditionQuiz
-from quizzes.types.custom_quizzes import SmallMultiplicationQuiz, SubtractionQuiz
+from quizzes.types import (
+    AdditionQuiz,
+    MultiplicationQuiz,
+    SmallMultiplicationQuiz,
+    SubtractionQuiz
+)
 # Import scores page
 from quizzes.scores_page import ScoresPage
 # Import user manager and components

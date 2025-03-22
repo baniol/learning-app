@@ -4,7 +4,7 @@ Navigation bar component for quiz application.
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QCheckBox, QLabel, QSpinBox, QComboBox
 from PySide6.QtCore import Signal
 from ..styles import NAV_BAR_BORDER_STYLE, SUBMENU_BACK_BUTTON_STYLE
-from ..new_components.base_component import BaseComponent
+from .base_component import BaseComponent
 
 class NavigationBar(BaseComponent):
     """Navigation bar with return button and optional controls."""

@@ -40,6 +40,7 @@ ENV/
 htmlcov/
 .pytest_cache/
 .mypy_cache/
+quiz_data.db
 
 # Qt specific
 *.qmlc

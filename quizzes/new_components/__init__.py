@@ -1,15 +1,21 @@
 """
-UI components package for the quiz application.
+DEPRECATED: This package is deprecated, use quizzes.components instead.
 
-This package contains reusable UI components used across different quizzes.
+This package is kept for backward compatibility during the transition.
+All imports should be updated to use the components package directly.
 """
-from .base_component import BaseComponent
-from .base_visual_aid import BaseVisualAid
+import warnings
 
-# These components still need to be migrated from the old file
-# Don't import them here to avoid circular imports
+warnings.warn(
+    "The 'new_components' package is deprecated. "
+    "Use 'quizzes.components' instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
+# Re-export everything from components for backwards compatibility
+from ..components.base_component import BaseComponent
 
 __all__ = [
-    'BaseComponent',
-    'BaseVisualAid'
+    'BaseComponent'
 ] 
