@@ -23,6 +23,8 @@ from .mappings import DEFAULT_QUIZ_QUESTIONS
 from .components import ScoreIndicator
 # Import database module for score saving
 from .database.scores import save_score
+# Import debug module
+from .debug import log
 
 class BaseQuiz(QWidget):
     """Base class for all quizzes with common UI and functionality.
@@ -44,7 +46,7 @@ class BaseQuiz(QWidget):
         super().__init__(parent)
         self.setStyleSheet(MAIN_BORDER_STYLE)
         
-        print(f"DEBUG: Initializing BaseQuiz with {total_questions} questions")
+        log("BaseQuiz", f"Initializing BaseQuiz with {total_questions} questions")
         
         # Quiz session state
         self.total_questions: int = total_questions
@@ -78,12 +80,12 @@ class BaseQuiz(QWidget):
         self.progress_bar.setValue(0)
         self.progress_label.setText(PROGRESS_LABEL_TEXT.format(0, self.total_questions))
         
-        print(f"DEBUG: BaseQuiz initialization completed, calling next_question()")
+        log("BaseQuiz", "BaseQuiz initialization completed, calling next_question()")
         
         # Generate first question using next_question to ensure counter starts at 1
         self.next_question()
         
-        print(f"DEBUG: BaseQuiz after next_question call, current_question: {self.current_question}")
+        log("BaseQuiz", f"BaseQuiz after next_question call, current_question: {self.current_question}")
     
     def _create_progress_container(self) -> None:
         """Create the progress bar and score indicator container."""
@@ -238,7 +240,7 @@ class BaseQuiz(QWidget):
 
     def on_next_button_click(self) -> None:
         """Handle next button click based on quiz state."""
-        print(f"DEBUG: on_next_button_click called, current_question: {self.current_question}")
+        log("BaseQuiz", f"on_next_button_click called, current_question: {self.current_question}")
         
         if self.quiz_completed:
             self.restart_quiz()
@@ -246,7 +248,7 @@ class BaseQuiz(QWidget):
             # Only increment if not the first question (which is handled by next_question)
             if self.current_question > 0:
                 self.current_question += 1
-                print(f"DEBUG: Incremented current_question to: {self.current_question}")
+                log("BaseQuiz", f"Incremented current_question to: {self.current_question}")
             
             # Check if we've exceeded total_questions
             if self.current_question > self.total_questions:
@@ -285,14 +287,14 @@ class BaseQuiz(QWidget):
 
     def generate_new_question(self) -> None:
         """Generate a new question and update the UI."""
-        print(f"DEBUG: generate_new_question called, current_question before: {self.current_question}")
+        log("BaseQuiz", f"generate_new_question called, current_question before: {self.current_question}")
         
         # Note: We don't increment current_question here anymore
         # The next_question method handles incrementing the counter
         
         # Update UI
         self.progress_bar.setValue(self.current_question)
-        print(f"DEBUG: Set progress bar to: {self.current_question}")
+        log("BaseQuiz", f"Set progress bar to: {self.current_question}")
         self.progress_label.setText(PROGRESS_LABEL_TEXT.format(self.current_question, self.total_questions))
         
         # Check if quiz is complete
@@ -570,16 +572,16 @@ class BaseQuiz(QWidget):
 
     def next_question(self) -> None:
         """Show the next question in the quiz sequence or restart if completed."""
-        print(f"DEBUG: next_question called, current_question before: {self.current_question}")
+        log("BaseQuiz", f"next_question called, current_question before: {self.current_question}")
         
         # If this is the first question of a new quiz (current_question is 0)
         # Always set it to 1 (not incrementing)
         if self.current_question == 0:
             self.current_question = 1
-            print(f"DEBUG: Set current_question to: {self.current_question}")
+            log("BaseQuiz", f"Set current_question to: {self.current_question}")
             # Update UI for question 1
             self.progress_bar.setValue(1)  
-            print(f"DEBUG: Set progress bar to: 1")
+            log("BaseQuiz", f"Set progress bar to: 1")
             self.progress_label.setText(PROGRESS_LABEL_TEXT.format(1, self.total_questions))
             self.generate_new_question()
         else:

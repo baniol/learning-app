@@ -12,15 +12,18 @@ from quizzes.types.addition_quiz import AdditionQuiz
 from quizzes.types.custom_quizzes import SmallMultiplicationQuiz, SubtractionQuiz
 # Import scores page
 from quizzes.scores_page import ScoresPage
-# Import user management
-from quizzes.database.users import get_all_users, get_user
-from quizzes.components.user_dialog import UserDialog
-from quizzes.components.navigation_bar import NavigationBar
+# Import user manager
+from quizzes.user_manager import UserManager
+from PySide6.QtWidgets import QLabel
+from PySide6.QtCore import Qt
+# Import debug module
+from quizzes.debug import set_debug_mode, log
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        log("Main", "Initializing MainWindow")
         self.setWindowTitle(WINDOW_TITLE)
         self.setGeometry(styles.WINDOW_INITIAL_POSITION[0], styles.WINDOW_INITIAL_POSITION[1], 
                          styles.WINDOW_INITIAL_SIZE[0], styles.WINDOW_INITIAL_SIZE[1])
@@ -37,6 +40,10 @@ class MainWindow(QMainWindow):
                                            styles.MAIN_LAYOUT_MARGINS[2], styles.MAIN_LAYOUT_MARGINS[3])
         self.main_layout.setSpacing(0)
         self.central_widget.setLayout(self.main_layout)
+        
+        # Initialize user manager - debug mode is handled by the debug module
+        self.user_manager = UserManager(self)
+        self.user_manager.user_changed.connect(self.on_user_data_changed)
         
         # Add top navigation bar with user selection
         self.setup_top_bar()
@@ -62,12 +69,11 @@ class MainWindow(QMainWindow):
         self.quiz_container.hide()
         self.scores_page.hide()
         
-        # Set current user - default to Anonymous (ID 1)
-        self.current_user_id = 1
-        self.current_user = get_user(self.current_user_id) or {"id": 1, "username": "anonymous", "display_name": "Anonymous"}
+        log("Main", "MainWindow initialization complete")
 
     def setup_top_bar(self):
         """Set up the top navigation bar with user selection."""
+        log("Main", "Setting up top bar")
         # Top bar container
         top_container = QWidget()
         top_container.setFixedHeight(50)
@@ -85,8 +91,6 @@ class MainWindow(QMainWindow):
         title_layout.setContentsMargins(0, 0, 0, 0)
         title_label.setLayout(title_layout)
         
-        from PySide6.QtWidgets import QLabel
-        from PySide6.QtCore import Qt
         app_title = QLabel("Quiz App")
         app_title.setStyleSheet("font-size: 18px; font-weight: bold;")
         title_layout.addWidget(app_title)
@@ -96,98 +100,23 @@ class MainWindow(QMainWindow):
         # Add spacer
         top_layout.addStretch(1)
         
-        # Navigation bar for user dropdown
-        self.nav_bar = NavigationBar(lambda: None)  # No return callback needed
-        self.nav_bar.setFixedHeight(40)
-        
-        # Get users from database
-        try:
-            users = get_all_users()
-        except Exception as e:
-            QMessageBox.warning(self, "Database Error", f"Failed to load users: {str(e)}")
-            users = [{"id": 1, "display_name": "Anonymous"}]
-        
-        # Add user dropdown
-        self.user_dropdown = self.nav_bar.add_user_dropdown(users)
-        self.nav_bar.user_changed.connect(self.on_user_changed)
-        
-        top_layout.addWidget(self.nav_bar)
+        # Setup user navigation bar
+        nav_bar = self.user_manager.setup_navigation_bar(lambda: None)  # No return callback needed
+        top_layout.addWidget(nav_bar)
         
         # Add to main layout
         self.main_layout.addWidget(top_container)
+        log("Main", "Top bar setup complete")
     
-    def on_user_changed(self, user_id):
-        """Handle user selection changes."""
-        print(f"User changed to ID: {user_id}")
-        
-        # If it's the special "Add New User" option
-        if user_id == -1:
-            # Add new user was selected
-            print("Add new user selected, opening dialog...")
-            result = UserDialog.create_user(self)
-            print(f"Dialog result: {result}")
-            
-            if result:
-                # Dialog was accepted and user was created
-                new_user_id, username, display_name = result
-                print(f"New user created: {new_user_id}, {username}, {display_name}")
-                
-                # Update the dropdown with the new user selected
-                self.refresh_user_dropdown(new_user_id)
-                
-                # Set as current user
-                self.current_user_id = new_user_id
-                self.current_user = {
-                    "id": new_user_id,
-                    "username": username,
-                    "display_name": display_name
-                }
-            else:
-                # Dialog was canceled or failed
-                print("User creation canceled or failed")
-                # Reset to the previously selected user
-                try:
-                    # Find the index for the current user ID
-                    for i in range(self.user_dropdown.count()):
-                        if self.user_dropdown.itemData(i) == self.current_user_id:
-                            self.user_dropdown.setCurrentIndex(i)
-                            break
-                except Exception as e:
-                    print(f"Error resetting user dropdown: {str(e)}")
-                    # If all else fails, set to the first item
-                    if self.user_dropdown.count() > 0:
-                        self.user_dropdown.setCurrentIndex(0)
-        else:
-            # Regular user selection
-            self.current_user_id = user_id
-            self.current_user = get_user(user_id) or {"id": user_id}
-    
-    def refresh_user_dropdown(self, select_user_id=None):
-        """Refresh the user dropdown with current users."""
-        try:
-            users = get_all_users()
-            
-            # Clear and repopulate dropdown
-            current_index = 0
-            self.user_dropdown.clear()
-            
-            for i, user in enumerate(users):
-                self.user_dropdown.addItem(user['display_name'], user['id'])
-                if select_user_id and user['id'] == select_user_id:
-                    current_index = i
-            
-            # Add the "Add New User" option
-            self.user_dropdown.addItem("+ Add New User", -1)
-            
-            # Set the selected index
-            if select_user_id:
-                self.user_dropdown.setCurrentIndex(current_index)
-                
-        except Exception as e:
-            QMessageBox.warning(self, "Database Error", f"Failed to refresh users: {str(e)}")
+    def on_user_data_changed(self, user_data):
+        """Handle user data changes from UserManager."""
+        log("Main", f"User data changed: {user_data}")
+        # Update any UI elements that depend on the current user
+        # This is called when the user selection changes
     
     def on_quiz_selected(self, name):
         """Handle quiz selection from the menu."""
+        log("Main", f"Quiz selected: {name}")
         # Special case for Scores
         if name == "Scores":
             self.show_scores()
@@ -195,6 +124,7 @@ class MainWindow(QMainWindow):
 
         quiz_class_name = QUIZ_TYPE_MAP.get(name)
         if quiz_class_name:
+            log("Main", f"Creating quiz of type: {quiz_class_name}")
             # Use the quiz manager to create the quiz
             quiz = quiz_manager.create_quiz(
                 quiz_class_name,
@@ -203,12 +133,14 @@ class MainWindow(QMainWindow):
             )
             if quiz:
                 # Set current user for the quiz
+                current_user = self.user_manager.get_current_user()
                 if hasattr(quiz, 'set_player_name'):
-                    quiz.set_player_name(self.current_user.get('display_name', 'Anonymous'))
+                    quiz.set_player_name(current_user.get('display_name', 'Anonymous'))
                 self.show_quiz(quiz)
 
     def show_quiz(self, quiz):
         """Show the selected quiz."""
+        log("Main", "Showing quiz")
         self.quiz_container.set_quiz(quiz)
         self.menu.hide()
         self.scores_page.hide()
@@ -216,6 +148,7 @@ class MainWindow(QMainWindow):
 
     def show_scores(self):
         """Show the scores page."""
+        log("Main", "Showing scores page")
         self.scores_page.refresh()
         self.menu.hide()
         self.quiz_container.hide()
@@ -223,11 +156,16 @@ class MainWindow(QMainWindow):
 
     def show_menu(self):
         """Return to the main menu."""
+        log("Main", "Showing main menu")
         self.quiz_container.hide()
         self.scores_page.hide()
         self.menu.show()
 
 if __name__ == "__main__":
+    # Check for command line arguments
+    if len(sys.argv) > 1 and sys.argv[1] == "--debug":
+        set_debug_mode(True)
+    
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
