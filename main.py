@@ -12,8 +12,9 @@ from quizzes.types.addition_quiz import AdditionQuiz
 from quizzes.types.custom_quizzes import SmallMultiplicationQuiz, SubtractionQuiz
 # Import scores page
 from quizzes.scores_page import ScoresPage
-# Import user manager
+# Import user manager and components
 from quizzes.user_manager import UserManager
+from quizzes.components import TopBar
 from PySide6.QtWidgets import QLabel
 from PySide6.QtCore import Qt
 # Import debug module
@@ -46,7 +47,8 @@ class MainWindow(QMainWindow):
         self.user_manager.user_changed.connect(self.on_user_data_changed)
         
         # Add top navigation bar with user selection
-        self.setup_top_bar()
+        self.top_bar = TopBar(self.user_manager, self)
+        self.main_layout.addWidget(self.top_bar)
 
         # Content
         self.content_layout = QVBoxLayout()
@@ -71,43 +73,6 @@ class MainWindow(QMainWindow):
         
         log("Main", "MainWindow initialization complete")
 
-    def setup_top_bar(self):
-        """Set up the top navigation bar with user selection."""
-        log("Main", "Setting up top bar")
-        # Top bar container
-        top_container = QWidget()
-        top_container.setFixedHeight(50)
-        top_container.setStyleSheet(styles.NAV_BAR_BORDER_STYLE)
-        
-        # Top bar layout
-        top_layout = QHBoxLayout()
-        top_layout.setContentsMargins(10, 5, 10, 5)
-        top_container.setLayout(top_layout)
-        
-        # App title
-        title_label = QWidget()
-        title_label.setFixedWidth(200)
-        title_layout = QHBoxLayout()
-        title_layout.setContentsMargins(0, 0, 0, 0)
-        title_label.setLayout(title_layout)
-        
-        app_title = QLabel("Quiz App")
-        app_title.setStyleSheet("font-size: 18px; font-weight: bold;")
-        title_layout.addWidget(app_title)
-        
-        top_layout.addWidget(title_label)
-        
-        # Add spacer
-        top_layout.addStretch(1)
-        
-        # Setup user navigation bar
-        nav_bar = self.user_manager.setup_navigation_bar(lambda: None)  # No return callback needed
-        top_layout.addWidget(nav_bar)
-        
-        # Add to main layout
-        self.main_layout.addWidget(top_container)
-        log("Main", "Top bar setup complete")
-    
     def on_user_data_changed(self, user_data):
         """Handle user data changes from UserManager."""
         log("Main", f"User data changed: {user_data}")
