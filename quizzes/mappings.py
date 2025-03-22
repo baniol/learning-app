@@ -7,6 +7,7 @@ This module contains all mapping dictionaries and lists used for configuration.
 MENU_CATEGORIES = [
     "Math",
     "Languages",
+    "General",
     "Settings",
     "Stats"
 ]
@@ -17,11 +18,16 @@ SUBMENU_ITEMS = {
         "Mnożenie 2-5",
         "Dodawanie do 20",
         "Mnożenie małych liczb",
-        "Odejmowanie od 10-20"
+        "Odejmowanie od 10-20",
+        "Dzielenie",
+        "Mixed Math"
     ],
     "Languages": [
         "English Words",
         "Spanish Words",
+        "English-Polish Phrasal Verbs",
+        "Polish-English Phrasal Verbs",
+        "Advanced Phrasal Verbs"
     ],
     "Settings": [
         "Preferences",
@@ -40,6 +46,11 @@ QUIZ_TYPE_MAP = {
     "Dodawanie do 20": "AdditionQuiz",
     "Mnożenie małych liczb": "SmallMultiplicationQuiz",
     "Odejmowanie od 10-20": "SubtractionQuiz",
+    "Dzielenie": "DivisionQuiz",
+    "Mixed Math": "MathMixQuiz",
+    "English-Polish Phrasal Verbs": "EnglishPolishPhrasalVerbsQuiz",
+    "Polish-English Phrasal Verbs": "PolishEnglishPhrasalVerbsQuiz",
+    "Advanced Phrasal Verbs": "AdvancedPhrasalVerbsQuiz",
     "Scores": "Scores"  # Special case for the scores page
 }
 

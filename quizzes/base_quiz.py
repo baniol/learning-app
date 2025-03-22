@@ -300,42 +300,58 @@ class BaseQuiz(QWidget):
             print(MAIN_WINDOW_ERROR)
 
     def generate_new_question(self) -> None:
-        """Generate a new question and update the UI."""
-        log("BaseQuiz", f"generate_new_question called, current_question before: {self.current_question}")
+        """Generate a new question and all UI components for the question.
         
-        # Note: We don't increment current_question here anymore
-        # The next_question method handles incrementing the counter
+        This is the main method responsible for:
+        1. Updating progress indicators
+        2. Generating new random numbers for the question
+        3. Calculating the expected answer
+        4. Setting up the UI for the question type
+        """
+        log("BaseQuiz", f"generate_new_question called, current_question: {self.current_question}")
         
-        # Update UI
+        # Update progress bar and label
         self.progress_bar.setValue(self.current_question)
-        log("BaseQuiz", f"Set progress bar to: {self.current_question}")
         self.progress_label.setText(PROGRESS_LABEL_TEXT.format(self.current_question, self.total_questions))
         
-        # Check if quiz is complete
-        if self.current_question > self.total_questions:
-            self.show_results()
-            return
-        
-        # Clear previous answer buttons
-        self.clear_answer_buttons()
-        
-        # Generate new question
+        # Generate new numbers and expected answer
         self.generate_numbers()
         self.expected_answer = self.calculate_answer()
         
-        # Update question label with default style
-        self.question_label.setText(self.format_question())
-        self.question_label.setStyleSheet(QUESTION_LABEL_STYLE)
+        # Format the question text
+        question_text = self.format_question()
+        self.question_label.setText(question_text)
+        self.question_label.setStyleSheet(QUESTION_LABEL_STYLE)  # Reset style
         
-        # Generate answer options
+        # Clear answer buttons from previous question
+        self.clear_answer_buttons()
+        
+        # Generate answer options (buttons or input)
         options = self.generate_answer_options()
         
-        # Create answer buttons/inputs
-        self.create_answer_buttons(options)
+        # For string-based answers with only one option, use input field regardless of setting
+        if len(options) == 1 and isinstance(options[0], str) and not self.self_assess_mode:
+            # Temporarily switch to input mode for this question
+            temp_input_mode = True
+        else:
+            # Use the configured input mode
+            temp_input_mode = self.input_mode
         
-        # Additional setup for specific quiz types
-        self.on_new_question()
-    
+        # Create answer interface (buttons or input field)
+        if self.self_assess_mode:
+            self.create_answer_buttons(options)
+        elif temp_input_mode:
+            self._create_input_field()
+        else:
+            self._create_option_buttons(options)
+        
+        # Reset feedback
+        self.feedback_label.setText("")
+        self.feedback_label.setStyleSheet(FEEDBACK_LABEL_STYLE)
+        
+        # Disable next button until an answer is given
+        self.next_button.setEnabled(False)
+
     def show_results(self) -> None:
         """Display the results screen at the end of the quiz."""
         self.quiz_completed = True
@@ -405,11 +421,11 @@ class BaseQuiz(QWidget):
         random.shuffle(options)
         return options
     
-    def create_answer_buttons(self, options: List[int]) -> None:
+    def create_answer_buttons(self, options: List[Union[int, str]]) -> None:
         """Create buttons for each answer option in a 2x2 grid or input field based on mode.
         
         Args:
-            options: List of answer options (integers)
+            options: List of answer options
         """
         if self.self_assess_mode:
             self._create_self_assess_buttons()
@@ -429,67 +445,78 @@ class BaseQuiz(QWidget):
             button = QPushButton(str(option))
             button.setStyleSheet(ANSWER_BUTTON_STYLE)
             button.setMinimumHeight(50)
-            button.clicked.connect(lambda checked, ans=option: self.check_answer(ans))
+            button.clicked.connect(lambda checked, ans=option: self.on_answer_button_click(ans))
             self.answers_layout.addWidget(button, row, col)
 
     def _create_input_field(self) -> None:
-        """Create an input field and submit button for manual answer entry."""
+        """Create a text input field and submit button for direct answer input."""
         # Create input field
         self.answer_input = QLineEdit()
         self.answer_input.setStyleSheet(ANSWER_INPUT_STYLE)
-        self.answer_input.setPlaceholderText("Type your answer...")
+        self.answer_input.setPlaceholderText("Enter your answer...")
         self.answer_input.setMinimumHeight(50)
-        self.answer_input.setAlignment(Qt.AlignCenter)
-        # Only allow numbers to be entered
-        self.answer_input.setValidator(QIntValidator())
+        
+        # Only add numeric validator if expected answer is numeric
+        if isinstance(self.expected_answer, (int, float)):
+            self.answer_input.setValidator(QIntValidator())
+        
         # Connect return key to submit answer
-        self.answer_input.returnPressed.connect(self.submit_answer)
+        self.answer_input.returnPressed.connect(self.handle_submit_button)
         
         # Create submit button
         self.submit_button = QPushButton("Submit")
         self.submit_button.setStyleSheet(SUBMIT_BUTTON_STYLE)
         self.submit_button.setMinimumHeight(50)
-        self.submit_button.clicked.connect(self.submit_answer)
+        self.submit_button.clicked.connect(self.handle_submit_button)
         
         # Add to layout - one row layout with input field and submit button
         self.answers_layout.addWidget(self.answer_input, 0, 0)
         self.answers_layout.addWidget(self.submit_button, 0, 1)
 
-    def submit_answer(self) -> None:
+    def handle_submit_button(self) -> None:
         """Handle the submit button click in input mode."""
-        # Get the answer from the input field
-        text = self.answer_input.text()
-        if text:
-            try:
-                answer = int(text)
-                self.check_answer(answer)
-            except ValueError:
-                # If not a valid number, show error
-                self.feedback_label.setText("Please enter a valid number")
-                self.feedback_label.setStyleSheet(FEEDBACK_INCORRECT_STYLE)
+        # Get text from input field
+        text = self.answer_input.text().strip()
+        
+        # If empty, don't process
+        if not text:
+            return
+        
+        # Disable the input field and submit button
+        self.answer_input.setEnabled(False)
+        self.submit_button.setEnabled(False)
+        
+        # Try to convert to int for numeric answers
+        try:
+            # First try to convert to int
+            answer = int(text)
+        except ValueError:
+            # If not a valid integer, use as string
+            answer = text
+        
+        # Process the answer
+        self.on_answer_button_click(answer)
 
-    def check_answer(self, selected_answer: int) -> None:
-        """Check if the selected answer is correct and update the UI accordingly.
+    def on_answer_button_click(self, selected_answer: Union[int, str]) -> None:
+        """Handle an answer button click.
         
         Args:
             selected_answer: The answer selected by the user
         """
-        # Disable all answer inputs
-        if self.input_mode:
-            self.answer_input.setEnabled(False)
-            self.submit_button.setEnabled(False)
-        else:
-            for i in range(self.answers_layout.count()):
-                button = self.answers_layout.itemAt(i).widget()
+        # Disable all answer buttons
+        for i in range(self.answers_layout.count()):
+            button = self.answers_layout.itemAt(i).widget()
+            if button is not None:
                 button.setEnabled(False)
         
-        if selected_answer == self.expected_answer:
+        # Check the answer
+        if self.check_answer(selected_answer):
             self.correct_answers += 1
             self.show_correct_feedback()
         else:
             self.show_incorrect_feedback()
         
-        # Update score indicator instead of text label
+        # Update score indicator
         self.score_indicator.set_score(self.correct_answers, self.total_questions, self.current_question)
         
         # Enable next button
@@ -498,7 +525,26 @@ class BaseQuiz(QWidget):
             self.next_button.setText(CORRECT_BUTTON_ICON)
         else:
             self.next_button.setText(NEXT_BUTTON_ICON)
-    
+
+    def check_answer(self, user_answer: Union[int, str]) -> bool:
+        """Check if the given answer is correct.
+        
+        Args:
+            user_answer: The user's answer (int or str)
+            
+        Returns:
+            True if the answer is correct, False otherwise
+        """
+        # If both are numeric, compare them as numbers
+        if isinstance(self.expected_answer, (int, float)) and isinstance(user_answer, (int, float)):
+            return self.expected_answer == user_answer
+        
+        # Otherwise, compare as strings with normalization
+        expected = str(self.expected_answer).strip().lower()
+        given = str(user_answer).strip().lower()
+        
+        return expected == given
+
     def show_correct_feedback(self) -> None:
         """Show feedback for a correct answer."""
         self.feedback_label.setText(CORRECT_FEEDBACK)
@@ -701,83 +747,4 @@ class BaseQuiz(QWidget):
         if self.current_question >= self.total_questions:
             self.next_button.setText(CORRECT_BUTTON_ICON)
         else:
-            self.next_button.setText(NEXT_BUTTON_ICON)
-        
-    def toggle_input_mode(self, state):
-        """Toggle between button selection mode and direct input mode.
-        
-        Args:
-            state: The new state (checked=True means use input mode)
-        """
-        log("BaseQuiz", f"toggle_input_mode called with state: {state}")
-        
-        # If input mode is fixed at quiz level, do not allow toggling
-        if self.fixed_input_mode:
-            return
-            
-        # Only clear and recreate if this is an actual state change
-        if self.input_mode != bool(state) or self.self_assess_mode:
-            # Clear existing UI
-            self.clear_answer_buttons()
-            
-            # Set the new input mode
-            self.input_mode = bool(state)
-            self.self_assess_mode = False
-            
-            # Refresh the current question with the new mode
-            self.next_question()
-
-    def set_player_name(self, name: str) -> None:
-        """Set the player name for score recording."""
-        self.player_name = name if name else "Anonymous"
-
-    def init_ui(self):
-        """Initialize additional UI components and setup."""
-        # Additional initialization logic if needed
-        pass
-
-    def next_question(self) -> None:
-        """Show the next question in the quiz sequence or restart if completed."""
-        log("BaseQuiz", f"next_question called, current_question before: {self.current_question}")
-        
-        # If this is the first question of a new quiz (current_question is 0)
-        # Always set it to 1 (not incrementing)
-        if self.current_question == 0:
-            self.current_question = 1
-            log("BaseQuiz", f"Set current_question to: {self.current_question}")
-            # Update UI for question 1
-            self.progress_bar.setValue(1)  
-            log("BaseQuiz", f"Set progress bar to: 1")
-            self.progress_label.setText(PROGRESS_LABEL_TEXT.format(1, self.total_questions))
-            self.generate_new_question()
-        else:
-            # If we've already started, increment and generate
-            self.generate_new_question()
-        
-        # Update score indicator
-        self.score_indicator.set_score(self.correct_answers, self.total_questions, self.current_question)
-        
-        # Re-enable input for new question
-        if self.self_assess_mode:
-            if hasattr(self, 'show_answer_button'):
-                self.show_answer_button.show()
-                self.show_answer_button.setEnabled(True)
-            if hasattr(self, 'thumbs_up_button'):
-                self.thumbs_up_button.hide()
-                self.thumbs_up_button.setEnabled(True)
-            if hasattr(self, 'thumbs_down_button'):
-                self.thumbs_down_button.hide()
-                self.thumbs_down_button.setEnabled(True)
-        elif self.input_mode:
-            if hasattr(self, 'answer_input'):
-                self.answer_input.setEnabled(True)
-                self.answer_input.clear()
-                self.answer_input.setFocus()
-            if hasattr(self, 'submit_button'):
-                self.submit_button.setEnabled(True)
-        
-        # Disable next button until an answer is submitted
-        self.next_button.setEnabled(False)
-        
-        # Clear feedback label
-        self.feedback_label.setText("") 
+            self.next_button.setText(NEXT_BUTTON_ICON) 

@@ -1,0 +1,42 @@
+[
+    {
+        "question": "What is 15 + 27?",
+        "answer": "42"
+    },
+    {
+        "question": "What is 8 × 9?",
+        "answer": "72"
+    },
+    {
+        "question": "What is 144 ÷ 12?",
+        "answer": "12"
+    },
+    {
+        "question": "What is 50 - 35?",
+        "answer": "15"
+    },
+    {
+        "question": "What is 7²?",
+        "answer": "49"
+    },
+    {
+        "question": "What is the square root of 25?",
+        "answer": "5"
+    },
+    {
+        "question": "What is 3 × 4 × 5?",
+        "answer": "60"
+    },
+    {
+        "question": "What is 18 + 17 + 15?",
+        "answer": "50"
+    },
+    {
+        "question": "What is 100 ÷ 4?",
+        "answer": "25"
+    },
+    {
+        "question": "What is 13 × 6?",
+        "answer": "78"
+    }
+]

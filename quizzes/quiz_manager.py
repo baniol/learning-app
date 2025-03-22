@@ -81,6 +81,14 @@ class QuizManager:
             
         return list(self._quiz_registry.keys())
     
+    def reset(self):
+        """Reset the quiz manager, clearing all registered quizzes.
+        
+        This is useful for reloading quizzes after changes to quiz files.
+        """
+        self._quiz_registry = {}
+        self._loaded = False
+    
     def _load_quizzes(self):
         """Load all quiz classes defined in the types package.
         
@@ -94,12 +102,38 @@ class QuizManager:
             DivisionQuiz
         )
         
+        # Import file-based quiz functionality
+        from .file_based_quiz import create_quiz_from_file
+        
         # Register by class name (as defined in QUIZ_TYPE_MAP)
         self.register_quiz("AdditionQuiz", AdditionQuiz)
         self.register_quiz("MultiplicationQuiz", MultiplicationQuiz)
         self.register_quiz("SmallMultiplicationQuiz", SmallMultiplicationQuiz)
         self.register_quiz("SubtractionQuiz", SubtractionQuiz)
         self.register_quiz("DivisionQuiz", DivisionQuiz)
+        
+        # Register file-based quizzes
+        self.register_quiz("EnglishPolishPhrasalVerbsQuiz", create_quiz_from_file(
+            "quizzes/phrasal_verbs.json", 
+            "English-Polish Phrasal Verbs"
+        ))
+        
+        self.register_quiz("PolishEnglishPhrasalVerbsQuiz", create_quiz_from_file(
+            "quizzes/phrasal_verbs_reverse.json", 
+            "Polish-English Phrasal Verbs"
+        ))
+        
+        # Advanced phrasal verbs quiz with input field mode
+        self.register_quiz("AdvancedPhrasalVerbsQuiz", create_quiz_from_file(
+            "quizzes/advanced_phrasal_verbs.json", 
+            "Advanced Phrasal Verbs",
+            input_mode=True  # Use input field mode for this quiz
+        ))
+        
+        self.register_quiz("MathMixQuiz", create_quiz_from_file(
+            "quizzes/math_quiz.json",
+            "Mixed Math Quiz"
+        ))
         
         self._loaded = True
 
