@@ -3,8 +3,10 @@ Quiz factory functions for creating custom quizzes.
 """
 import random
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel
+from PySide6.QtCore import Qt
 from .base_quiz import BaseQuiz
 from .components.navigation_bar import NavigationBar
+from .debug import log
 
 def create_custom_quiz(
     name,
@@ -87,7 +89,7 @@ def create_custom_quiz(
                 self.visual_aid = visual_aid_class(0, 0)
                 self.visual_aid_layout.addWidget(self.visual_aid)
             except Exception as e:
-                print(f"Error creating initial visual aid: {e}")
+                log("QuizFactory", f"Error creating initial visual aid: {e}")
                 # Create a placeholder widget if the visual aid creation fails
                 placeholder = QLabel("Pomoce wizualne wczytają się przy pierwszym pytaniu")
                 placeholder.setAlignment(Qt.AlignCenter)
@@ -146,7 +148,7 @@ def create_custom_quiz(
                         self.visual_aid = self.visual_aid_class(self.num1, self.num2)
                         self.visual_aid_layout.addWidget(self.visual_aid)
                     except Exception as e:
-                        print(f"Error creating visual aid: {e}")
+                        log("QuizFactory", f"Error creating visual aid: {e}")
                         # Create an error message widget if visual aid creation fails
                         error_widget = QLabel(f"Błąd pomocy wizualnej: {self.num1}, {self.num2}")
                         error_widget.setAlignment(Qt.AlignCenter)
@@ -156,7 +158,7 @@ def create_custom_quiz(
                     # Update visibility based on checkbox state
                     self.toggle_visual_aid(was_visible)
                 except Exception as e:
-                    print(f"Error in on_new_question: {str(e)}")
+                    log("QuizFactory", f"Error in on_new_question: {str(e)}")
         
         def generate_numbers(self):
             """Generate numbers for this quiz question."""

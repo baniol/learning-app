@@ -8,7 +8,7 @@ The quiz application uses a modular architecture with these key components:
 
 1. **BaseQuiz** - The foundation class for all quizzes
 2. **Quiz factory function** - For creating custom quizzes with minimal code
-3. **NavigationBar** - UI component for navigation and controls
+3. **Components** - Reusable UI components like NavigationBar, TopBar, etc.
 4. **Visual aids** - Optional components to help visualize math problems
 
 ## Project Structure
@@ -19,13 +19,19 @@ The quiz application uses the following structure:
 quizzes/                  (Core package)
 ├── __init__.py           (Main package initialization)
 ├── base_quiz.py          (Base quiz functionality)
-├── components.py         (Shared UI components)
+├── components/           (UI components directory)
+│   ├── __init__.py       (Components initialization)
+│   ├── navigation_bar.py (Navigation bar component)
+│   ├── top_bar.py        (Top bar component)
+│   └── score_indicator.py (Score indicator component)
+├── debug.py              (Debug logging utilities)
 ├── styles.py             (UI styling and colors)
 ├── constants.py          (String constants for UI text)
 ├── mappings.py           (Menu items and quiz type mappings)
 ├── menu.py               (Menu component)
 ├── quiz_container.py     (Quiz container component)
 ├── create_quiz_factory.py (Factory function for creating quizzes)
+├── user_manager.py       (User management functionality)
 └── types/                (Subfolder for quiz implementations)
     ├── __init__.py       (Exports all quiz classes)
     ├── addition_quiz.py  (Addition quiz implementation)
