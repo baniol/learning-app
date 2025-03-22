@@ -11,33 +11,38 @@ from ..styles import (
     SHOW_HINT_BUTTON_STYLE, NUMBER_LABEL_STYLE
 )
 
-# Import directly from components_py.py file instead of components package
-from ..components_py import Dot, DotsGroup
+# Import from new visual_elements module
+from .visual_elements import Dot, DotsGroup
+from ..new_components.base_visual_aid import BaseVisualAid
 
-class VisualAidWidget(QWidget):
+class VisualAidWidget(BaseVisualAid):
     """Visual aid for addition problems showing dots representation."""
-    def __init__(self, num1, num2):
-        super().__init__()
-        self.setStyleSheet(VISUAL_AID_BORDER_STYLE)
-        # Set minimum height instead of fixed height to allow more flexible layout
-        self.setMinimumHeight(VISUAL_AID_HEIGHT)
-        # Use a policy that works better with layout changes
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        self.num1 = num1
-        self.num2 = num2
+    
+    def __init__(self, num1, num2, parent=None):
+        """Initialize the visual aid for addition problems.
+        
+        Args:
+            num1: First number to represent
+            num2: Second number to represent
+            parent: Parent widget
+        """
+        # Set attributes before super().__init__ which will call initialize_components
         self.complement_shown = False
+        self.larger_number = max(num1, num2)
+        self.smaller_number = min(num1, num2)
+        self.complement = 10 - self.larger_number if self.larger_number < 10 else 0
         
-        # Main layout - changed to horizontal
-        self.layout = QHBoxLayout()
-        self.layout.setSpacing(DEFAULT_SPACING)
-        self.setLayout(self.layout)
+        # Now call parent initializer which will call initialize_components
+        super().__init__(num1, num2, parent)
         
+    def initialize_components(self):
+        """Initialize the visual components."""
         # Left side container for dots
         self.dots_container = QWidget()
         self.dots_layout = QVBoxLayout()
         self.dots_layout.setSpacing(DEFAULT_SPACING)
         self.dots_container.setLayout(self.dots_layout)
-        self.layout.addWidget(self.dots_container, 4)  # Give more space to dots
+        self.main_layout.addWidget(self.dots_container, 4)  # Give more space to dots
         
         # Container for the visual representation
         self.visual_container = QWidget()
@@ -47,28 +52,37 @@ class VisualAidWidget(QWidget):
         self.dots_layout.addWidget(self.visual_container)
         
         # Create dot groups
-        self.first_group = DotsGroup(num1, BLUE_DOT_COLOR, f"{num1}")
-        self.second_group = DotsGroup(num2, RED_DOT_COLOR, f"{num2}")
+        self.first_group = DotsGroup(self.num1, BLUE_DOT_COLOR, f"{self.num1}")
+        self.second_group = DotsGroup(self.num2, RED_DOT_COLOR, f"{self.num2}")
         
         # Add groups to main layout
         self.visual_layout.addWidget(self.first_group)
         self.visual_layout.addWidget(self.second_group)
-        
-        # Determine which number to complement to 10
-        self.larger_number = max(num1, num2)
-        self.smaller_number = min(num1, num2)
-        self.complement = 10 - self.larger_number if self.larger_number < 10 else 0
         
         # Right side container for controls (button)
         self.controls_container = QWidget()
         self.controls_layout = QVBoxLayout()
         self.controls_layout.setContentsMargins(5, 0, 0, 0)  # Small left margin
         self.controls_container.setLayout(self.controls_layout)
-        self.layout.addWidget(self.controls_container, 1)  # Less space for button
+        self.main_layout.addWidget(self.controls_container, 1)  # Less space for button
         
         # Add complement button if needed
         if self.complement > 0:
             self.add_complement_controls()
+    
+    def refresh_visual(self):
+        """Refresh the visual based on current numbers."""
+        # Update the numbers in the groups
+        self.first_group.update_label(f"{self.num1}")
+        self.second_group.update_label(f"{self.num2}")
+        
+        # Recalculate complement
+        self.larger_number = max(self.num1, self.num2)
+        self.smaller_number = min(self.num1, self.num2)
+        self.complement = 10 - self.larger_number if self.larger_number < 10 else 0
+        
+        # Reset complement state
+        self.complement_shown = False
     
     def add_complement_controls(self):
         """Add controls for showing the complement to 10."""
@@ -80,6 +94,7 @@ class VisualAidWidget(QWidget):
         self.controls_layout.addWidget(self.show_button, alignment=Qt.AlignCenter)
     
     def show_complement(self):
+        """Show the complement to 10 for the larger number."""
         if self.complement <= 0 or self.complement_shown:
             return
             
@@ -118,35 +133,38 @@ class VisualAidWidget(QWidget):
         
         self.complement_shown = True
 
-class SubtractionVisualAidWidget(QWidget):
+class SubtractionVisualAidWidget(BaseVisualAid):
     """Visual aid for subtraction problems showing dots representation in a two-column layout."""
-    def __init__(self, num1, num2):
-        super().__init__()
-        self.setStyleSheet(VISUAL_AID_BORDER_STYLE)
-        self.setMinimumHeight(VISUAL_AID_HEIGHT)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        self.num1 = num1  # The minuend (starting number)
-        self.num2 = num2  # The subtrahend (number to subtract)
+    
+    def __init__(self, num1, num2, parent=None):
+        """Initialize the visual aid for subtraction problems.
+        
+        Args:
+            num1: The minuend (starting number)
+            num2: The subtrahend (number to subtract)
+            parent: Parent widget
+        """
+        # Set attributes before calling super().__init__ which will call initialize_components
         self.solution_shown = False
         
-        # Main layout - horizontal
-        self.layout = QHBoxLayout()
-        self.layout.setSpacing(DEFAULT_SPACING)
-        self.setLayout(self.layout)
+        # Now call parent initializer
+        super().__init__(num1, num2, parent)
         
+    def initialize_components(self):
+        """Initialize the visual components."""
         # Left side container for dots
         self.dots_container = QWidget()
         self.dots_layout = QVBoxLayout()
         self.dots_layout.setSpacing(DEFAULT_SPACING)
         self.dots_container.setLayout(self.dots_layout)
-        self.layout.addWidget(self.dots_container, 4)  # Give more space to dots
+        self.main_layout.addWidget(self.dots_container, 4)  # Give more space to dots
         
         # Add title label
-        if num1 == 0:
+        if self.num1 == 0:
             # Handle initialization with zeros (happens during startup)
             self.title_label = QLabel("Pomoce wizualne wczytują się...")
         else:
-            self.title_label = QLabel(f"{num1} - {num2} = ?")
+            self.title_label = QLabel(f"{self.num1} - {self.num2} = ?")
         self.title_label.setStyleSheet("font-size: 18px; font-weight: bold;")
         self.title_label.setAlignment(Qt.AlignCenter)
         self.dots_layout.addWidget(self.title_label)
@@ -159,8 +177,8 @@ class SubtractionVisualAidWidget(QWidget):
         self.dots_layout.addWidget(self.visual_container)
         
         # Create dot groups
-        self.first_group = DotsGroup(num1, BLUE_DOT_COLOR, f"Mamy {num1}")
-        self.second_group = DotsGroup(num2, RED_DOT_COLOR, f"Odejmujemy {num2}")
+        self.first_group = DotsGroup(self.num1, BLUE_DOT_COLOR, f"Mamy {self.num1}")
+        self.second_group = DotsGroup(self.num2, RED_DOT_COLOR, f"Odejmujemy {self.num2}")
         
         # Add groups to main layout
         self.visual_layout.addWidget(self.first_group)
@@ -174,7 +192,7 @@ class SubtractionVisualAidWidget(QWidget):
         self.dots_layout.addWidget(self.result_group)
         
         # Result label
-        self.result_label = QLabel(f"Zostaje {num1 - num2}")
+        self.result_label = QLabel(f"Zostaje {self.num1 - self.num2}")
         self.result_label.setStyleSheet("font-size: 16px; font-weight: bold; color: green;")
         self.result_label.setAlignment(Qt.AlignCenter)
         self.result_layout.addWidget(self.result_label)
@@ -202,15 +220,33 @@ class SubtractionVisualAidWidget(QWidget):
         self.controls_layout = QVBoxLayout()
         self.controls_layout.setContentsMargins(5, 0, 0, 0)  # Small left margin
         self.controls_container.setLayout(self.controls_layout)
-        self.layout.addWidget(self.controls_container, 1)  # Less space for button
+        self.main_layout.addWidget(self.controls_container, 1)  # Less space for button
         
         # Add show button if not showing zeros
-        if num1 > 0 and num2 > 0:
+        if self.num1 > 0 and self.num2 > 0:
             self.show_button = QPushButton("Pokaż rozwiązanie")
             self.show_button.setMinimumSize(120, 40)
             self.show_button.setStyleSheet(SHOW_HINT_BUTTON_STYLE)
             self.show_button.clicked.connect(self.show_solution)
             self.controls_layout.addWidget(self.show_button, alignment=Qt.AlignCenter)
+    
+    def refresh_visual(self):
+        """Refresh the visual based on current numbers."""
+        # Update the title
+        self.title_label.setText(f"{self.num1} - {self.num2} = ?")
+        
+        # Update the group labels
+        self.first_group.update_label(f"Mamy {self.num1}")
+        self.second_group.update_label(f"Odejmujemy {self.num2}")
+        
+        # Update result label (even if not visible)
+        self.result_label.setText(f"Zostaje {self.num1 - self.num2}")
+        
+        # Hide the result group
+        self.result_group.hide()
+        
+        # Reset solution state
+        self.solution_shown = False
     
     def show_solution(self):
         """Show the subtraction solution."""
@@ -251,8 +287,4 @@ class SubtractionVisualAidWidget(QWidget):
         # Show the result group
         self.result_group.show()
         
-        self.solution_shown = True
-        
-        # Disable button
-        self.show_button.setEnabled(False)
-        self.show_button.setText("Rozwiązanie pokazane") 
+        self.solution_shown = True 

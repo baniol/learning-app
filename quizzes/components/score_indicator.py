@@ -8,17 +8,26 @@ from ..styles import (
     SCORE_GOOD_COLOR, SCORE_BAD_COLOR,
     SCORE_BOX_WIDTH, SCORE_BOX_HEIGHT, SCORE_BOX_STYLE
 )
+from ..new_components.base_component import BaseComponent
 
-class ScoreIndicator(QWidget):
+class ScoreIndicator(BaseComponent):
     """Visual indicator for quiz score showing a colored box with score percentage."""
     
     def __init__(self, parent=None):
-        super().__init__(parent)
+        """Initialize the score indicator.
+        
+        Args:
+            parent: Parent widget
+        """
+        super().__init__(
+            parent=parent,
+            style=SCORE_BOX_STYLE
+        )
+        
         self.correct = 0
         self.total = 0
         self.answered = 0  # Track answered questions separately
         self.setFixedSize(SCORE_BOX_WIDTH, SCORE_BOX_HEIGHT)
-        self.setStyleSheet(SCORE_BOX_STYLE)
     
     def set_score(self, correct, total, current_question=None):
         """Set the score values and update the display.

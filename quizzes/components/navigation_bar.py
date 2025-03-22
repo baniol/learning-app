@@ -4,48 +4,86 @@ Navigation bar component for quiz application.
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QCheckBox, QLabel, QSpinBox, QComboBox
 from PySide6.QtCore import Signal
 from ..styles import NAV_BAR_BORDER_STYLE, SUBMENU_BACK_BUTTON_STYLE
+from ..new_components.base_component import BaseComponent
 
-class NavigationBar(QWidget):
+class NavigationBar(BaseComponent):
     """Navigation bar with return button and optional controls."""
     
     # Signal emitted when the current user changes
     user_changed = Signal(int)  # user_id
     
     def __init__(self, return_callback, parent=None):
-        super().__init__(parent)
-        self.setStyleSheet(NAV_BAR_BORDER_STYLE)
-        self.setFixedHeight(40)  # Fixed height for nav bar
+        """Initialize the navigation bar.
+        
+        Args:
+            return_callback: Function to call when the return button is clicked
+            parent: Parent widget
+        """
+        super().__init__(
+            parent=parent,
+            style=NAV_BAR_BORDER_STYLE,
+            min_height=40  # Fixed height for nav bar
+        )
         
         # Create layout
-        self.layout = QHBoxLayout()
-        self.layout.setContentsMargins(5, 0, 5, 0)  # No vertical margins
-        self.setLayout(self.layout)
+        self.main_layout = self.create_layout(
+            orientation='horizontal',
+            margins=(5, 0, 5, 0),  # No vertical margins
+            spacing=5
+        )
         
         # Add return button
         self.return_button = QPushButton("← Back")
         self.return_button.setMinimumSize(150, 30)
         self.return_button.setStyleSheet(SUBMENU_BACK_BUTTON_STYLE)
         self.return_button.clicked.connect(return_callback)
-        self.layout.addWidget(self.return_button)
+        self.main_layout.addWidget(self.return_button)
         
         # Add spacer to push other controls to the right
-        self.layout.addStretch()
+        self.add_spacer(self.main_layout)
     
     def add_checkbox(self, label, checked=True, callback=None):
-        """Add a checkbox to the navigation bar."""
+        """Add a checkbox to the navigation bar.
+        
+        Args:
+            label: Label text for the checkbox
+            checked: Initial checked state
+            callback: Function to call when the checkbox state changes
+            
+        Returns:
+            The created QCheckBox
+        """
         checkbox = QCheckBox(label)
         checkbox.setChecked(checked)
         if callback:
             checkbox.stateChanged.connect(callback)
-        self.layout.addWidget(checkbox)
+        self.main_layout.addWidget(checkbox)
         return checkbox
         
     def add_input_mode_toggle(self, checked=False, callback=None):
-        """Add a toggle for switching between button and input mode."""
+        """Add a toggle for switching between button and input mode.
+        
+        Args:
+            checked: Initial checked state
+            callback: Function to call when the toggle state changes
+            
+        Returns:
+            The created QCheckBox
+        """
         return self.add_checkbox("Input Mode", checked, callback)
     
     def add_questions_spinbox(self, initial_value=20, min_value=5, max_value=50, callback=None):
-        """Add a spin box to select the number of questions."""
+        """Add a spin box to select the number of questions.
+        
+        Args:
+            initial_value: Initial value for the spinbox
+            min_value: Minimum allowed value
+            max_value: Maximum allowed value
+            callback: Function to call when the value changes
+            
+        Returns:
+            The created QSpinBox
+        """
         container = QWidget()
         container_layout = QHBoxLayout()
         container_layout.setContentsMargins(0, 0, 0, 0)
@@ -66,7 +104,7 @@ class NavigationBar(QWidget):
             spinbox.valueChanged.connect(callback)
         container_layout.addWidget(spinbox)
         
-        self.layout.addWidget(container)
+        self.main_layout.addWidget(container)
         return spinbox
     
     def add_user_dropdown(self, users, current_user_id=1):
@@ -111,7 +149,7 @@ class NavigationBar(QWidget):
         user_combo.currentIndexChanged.connect(self._on_user_changed)
         
         container_layout.addWidget(user_combo)
-        self.layout.addWidget(container)
+        self.main_layout.addWidget(container)
         
         self.user_combo = user_combo
         return user_combo
