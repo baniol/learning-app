@@ -50,8 +50,8 @@ class QuizContainer(BaseComponent):
         self.quiz_layout.addWidget(quiz)
         self.current_quiz = quiz
         
-        # Initialize the quiz
-        quiz.generate_new_question()
+        # No need to call anything here - the quiz is already initialized
+        # and next_question was already called during its initialization
     
     def _clear_current_quiz(self):
         """Clear the current quiz from the container."""

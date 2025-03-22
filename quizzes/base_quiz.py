@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLa
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QIntValidator
 import random
-from typing import List, Optional, Callable, Union, Any
+from typing import List, Optional, Callable, Union, Dict, Any
 from .styles import (
     QUESTION_LABEL_STYLE, QUESTION_CORRECT_STYLE, QUESTION_INCORRECT_STYLE,
     FEEDBACK_LABEL_STYLE, FEEDBACK_CORRECT_STYLE, FEEDBACK_INCORRECT_STYLE,
@@ -32,37 +32,58 @@ class BaseQuiz(QWidget):
     types should inherit from this class and override the necessary methods.
     """
     
-    def __init__(self, total_questions: int = DEFAULT_QUIZ_QUESTIONS):
+    def __init__(self, parent=None, total_questions=DEFAULT_QUIZ_QUESTIONS, show_visual_aid=True, show_questions_control=True):
         """Initialize the quiz with basic UI components.
         
         Args:
+            parent: Parent widget
             total_questions: The total number of questions to include in the quiz
+            show_visual_aid: Whether to show visual aids
+            show_questions_control: Whether to show question control options
         """
-        super().__init__()
+        super().__init__(parent)
         self.setStyleSheet(MAIN_BORDER_STYLE)
+        
+        print(f"DEBUG: Initializing BaseQuiz with {total_questions} questions")
         
         # Quiz session state
         self.total_questions: int = total_questions
-        self.current_question: int = 0
+        self.current_question: int = 0  # Will be set to 1 by next_question
         self.correct_answers: int = 0
         self.quiz_completed: bool = False
-        self.input_mode = False  # Default to button mode
+        self.input_mode: bool = False  # Default to button mode
+        self.show_visual_aid: bool = show_visual_aid
+        self.show_questions_control: bool = show_questions_control
+        self.player_name: str = "Anonymous"  # Default player name
         
         # Quiz problem state
         self.num1: int = 0
         self.num2: int = 0
-        self.correct_answer: int = 0
+        self.expected_answer: Optional[int] = None
         
         # Main layout
-        self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(10, 0, 10, 10)  # Left, Top, Right, Bottom
-        self.layout.setSpacing(DEFAULT_SPACING)
-        self.setLayout(self.layout)
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(20, 20, 20, 20)
+        self.setLayout(self.main_layout)
         
         self._create_progress_container()
-        self._create_question_display()
+        self._create_question_container()
         self._create_interaction_area()
         self._create_results_screen()
+        
+        # Initialize UI components
+        self.init_ui()
+        
+        # Setup initial UI state before generating first question
+        self.progress_bar.setValue(0)
+        self.progress_label.setText(PROGRESS_LABEL_TEXT.format(0, self.total_questions))
+        
+        print(f"DEBUG: BaseQuiz initialization completed, calling next_question()")
+        
+        # Generate first question using next_question to ensure counter starts at 1
+        self.next_question()
+        
+        print(f"DEBUG: BaseQuiz after next_question call, current_question: {self.current_question}")
     
     def _create_progress_container(self) -> None:
         """Create the progress bar and score indicator container."""
@@ -97,9 +118,9 @@ class BaseQuiz(QWidget):
         
         self.progress_layout.addWidget(score_container)
         
-        self.layout.addWidget(self.progress_container)
+        self.main_layout.addWidget(self.progress_container)
     
-    def _create_question_display(self) -> None:
+    def _create_question_container(self) -> None:
         """Create the question display area."""
         # Question label (with stretch to adapt to window height)
         self.question_label = QLabel()
@@ -108,7 +129,7 @@ class BaseQuiz(QWidget):
         self.question_label.setMinimumHeight(60)  # Minimum height instead of fixed
         # Allow question label to expand vertically when window is resized
         self.question_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        self.layout.addWidget(self.question_label)
+        self.main_layout.addWidget(self.question_label)
     
     def _create_interaction_area(self) -> None:
         """Create the interaction area with answer buttons, feedback, and next button."""
@@ -159,7 +180,7 @@ class BaseQuiz(QWidget):
         self.interaction_layout.addWidget(self.next_button_container, 1)  # 1 part for button
         
         # Add the interaction widget to the main layout
-        self.layout.addWidget(self.interaction_widget)
+        self.main_layout.addWidget(self.interaction_widget)
     
     def _create_results_screen(self) -> None:
         """Create the results screen shown at the end of the quiz."""
@@ -212,20 +233,31 @@ class BaseQuiz(QWidget):
         self.results_layout.addStretch(1)
         
         # Add the results widget to the main layout (initially hidden)
-        self.layout.addWidget(self.results_widget)
+        self.main_layout.addWidget(self.results_widget)
         self.results_widget.hide()
 
     def on_next_button_click(self) -> None:
         """Handle next button click based on quiz state."""
+        print(f"DEBUG: on_next_button_click called, current_question: {self.current_question}")
+        
         if self.quiz_completed:
             self.restart_quiz()
         else:
-            self.generate_new_question()
+            # Only increment if not the first question (which is handled by next_question)
+            if self.current_question > 0:
+                self.current_question += 1
+                print(f"DEBUG: Incremented current_question to: {self.current_question}")
+            
+            # Check if we've exceeded total_questions
+            if self.current_question > self.total_questions:
+                self.show_results()
+            else:
+                self.next_question()
 
     def restart_quiz(self) -> None:
         """Restart the quiz with a new set of questions."""
         # Reset quiz state
-        self.current_question = 0
+        self.current_question = 0  # Will be set to 1 by next_question
         self.correct_answers = 0
         self.quiz_completed = False
         
@@ -239,8 +271,8 @@ class BaseQuiz(QWidget):
         self.question_label.show()
         self.interaction_widget.show()
         
-        # Generate first question
-        self.generate_new_question()
+        # Generate first question with correct counting
+        self.next_question()
 
     def return_to_menu(self) -> None:
         """Return to the main menu."""
@@ -253,9 +285,14 @@ class BaseQuiz(QWidget):
 
     def generate_new_question(self) -> None:
         """Generate a new question and update the UI."""
-        # Update progress
-        self.current_question += 1
+        print(f"DEBUG: generate_new_question called, current_question before: {self.current_question}")
+        
+        # Note: We don't increment current_question here anymore
+        # The next_question method handles incrementing the counter
+        
+        # Update UI
         self.progress_bar.setValue(self.current_question)
+        print(f"DEBUG: Set progress bar to: {self.current_question}")
         self.progress_label.setText(PROGRESS_LABEL_TEXT.format(self.current_question, self.total_questions))
         
         # Check if quiz is complete
@@ -268,7 +305,7 @@ class BaseQuiz(QWidget):
         
         # Generate new question
         self.generate_numbers()
-        self.correct_answer = self.calculate_answer()
+        self.expected_answer = self.calculate_answer()
         
         # Update question label with default style
         self.question_label.setText(self.format_question())
@@ -277,26 +314,23 @@ class BaseQuiz(QWidget):
         # Generate answer options
         options = self.generate_answer_options()
         
-        # Create new answer buttons
+        # Create answer buttons/inputs
         self.create_answer_buttons(options)
-        
-        # Hide feedback and disable next button
-        self.feedback_label.setText("")
-        self.next_button.setEnabled(False)
         
         # Additional setup for specific quiz types
         self.on_new_question()
     
     def show_results(self) -> None:
-        """Show the quiz results."""
+        """Display the results screen at the end of the quiz."""
         self.quiz_completed = True
         
         # Calculate score percentage
-        score_percent = int((self.correct_answers / self.total_questions) * 100)
+        score_percent = (self.correct_answers / self.total_questions) * 100
         
-        # Update results text
-        self.results_score.setText(RESULTS_SCORE_TEXT.format(
-            self.correct_answers, 
+        # Update results widgets
+        self.results_title.setText("Quiz Complete!")
+        self.results_score.setText("{}/{} ({:.1f}%)".format(
+            self.correct_answers,
             self.total_questions,
             score_percent
         ))
@@ -311,7 +345,7 @@ class BaseQuiz(QWidget):
         
         # Save score to database
         quiz_type = self.__class__.__name__
-        save_score(quiz_type, self.correct_answers, self.total_questions)
+        save_score(quiz_type, self.correct_answers, self.total_questions, self.player_name)
         
         # Hide quiz UI elements
         self.question_label.hide()
@@ -342,13 +376,13 @@ class BaseQuiz(QWidget):
         Returns:
             List of answer options (integers)
         """
-        options = [self.correct_answer]
+        options = [self.expected_answer]
         
         # Generate 3 additional options (distractors)
         while len(options) < 4:
             # Generate a distractor within a reasonable range around the correct answer
-            option = random.randint(max(1, self.correct_answer - 5), self.correct_answer + 5)
-            if option != self.correct_answer and option not in options:
+            option = random.randint(max(1, self.expected_answer - 5), self.expected_answer + 5)
+            if option != self.expected_answer and option not in options:
                 options.append(option)
         
         # Shuffle options
@@ -431,7 +465,7 @@ class BaseQuiz(QWidget):
                 button = self.answers_layout.itemAt(i).widget()
                 button.setEnabled(False)
         
-        if selected_answer == self.correct_answer:
+        if selected_answer == self.expected_answer:
             self.correct_answers += 1
             self.show_correct_feedback()
         else:
@@ -456,7 +490,7 @@ class BaseQuiz(QWidget):
     
     def show_incorrect_feedback(self) -> None:
         """Show feedback for an incorrect answer."""
-        self.feedback_label.setText(INCORRECT_FEEDBACK.format(self.correct_answer))
+        self.feedback_label.setText(INCORRECT_FEEDBACK.format(self.expected_answer))
         self.feedback_label.setStyleSheet(FEEDBACK_INCORRECT_STYLE)
         self.question_label.setText(self.format_question_with_answer())
         self.question_label.setStyleSheet(QUESTION_INCORRECT_STYLE)
@@ -494,19 +528,18 @@ class BaseQuiz(QWidget):
         """
         raise NotImplementedError("Subclasses must implement format_question_with_answer")
 
-    def update_total_questions(self, value: int) -> None:
-        """Update the total number of questions for the quiz.
-        
-        Args:
-            value: New total number of questions
-        """
+    def set_total_questions(self, value):
+        """Set the total number of questions in the quiz."""
+        # Update the total questions property
         self.total_questions = value
+        
         # Update the progress bar range
         self.progress_bar.setRange(0, value)
+        
         # Update the label
         self.progress_label.setText(PROGRESS_LABEL_TEXT.format(self.current_question, self.total_questions))
         
-        # If we're already past the new total, show results
+        # If quiz is already in progress and we're now past the new total, show results
         if self.current_question > self.total_questions and not self.quiz_completed:
             self.show_results()
 
@@ -525,3 +558,48 @@ class BaseQuiz(QWidget):
         # Reset to regenerate
         self.current_question = current - 1
         self.generate_new_question() 
+
+    def set_player_name(self, name: str) -> None:
+        """Set the player name for score recording."""
+        self.player_name = name if name else "Anonymous"
+
+    def init_ui(self):
+        """Initialize additional UI components and setup."""
+        # Additional initialization logic if needed
+        pass
+
+    def next_question(self) -> None:
+        """Show the next question in the quiz sequence or restart if completed."""
+        print(f"DEBUG: next_question called, current_question before: {self.current_question}")
+        
+        # If this is the first question of a new quiz (current_question is 0)
+        # Always set it to 1 (not incrementing)
+        if self.current_question == 0:
+            self.current_question = 1
+            print(f"DEBUG: Set current_question to: {self.current_question}")
+            # Update UI for question 1
+            self.progress_bar.setValue(1)  
+            print(f"DEBUG: Set progress bar to: 1")
+            self.progress_label.setText(PROGRESS_LABEL_TEXT.format(1, self.total_questions))
+            self.generate_new_question()
+        else:
+            # If we've already started, increment and generate
+            self.generate_new_question()
+        
+        # Update score indicator
+        self.score_indicator.set_score(self.correct_answers, self.total_questions, self.current_question)
+        
+        # Re-enable input for new question
+        if self.input_mode:
+            if hasattr(self, 'answer_input'):
+                self.answer_input.setEnabled(True)
+                self.answer_input.clear()
+                self.answer_input.setFocus()
+            if hasattr(self, 'submit_button'):
+                self.submit_button.setEnabled(True)
+        
+        # Disable next button until an answer is submitted
+        self.next_button.setEnabled(False)
+        
+        # Clear feedback label
+        self.feedback_label.setText("") 

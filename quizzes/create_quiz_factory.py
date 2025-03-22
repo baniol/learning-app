@@ -30,14 +30,21 @@ def create_custom_quiz(
     class CustomQuiz(BaseQuiz):
         """Custom quiz generated with factory function."""
         
-        def __init__(self, total_questions=total_questions, show_questions_control=True):
+        def __init__(self, parent=None, total_questions=total_questions, show_visual_aid=True, show_questions_control=True):
             """Initialize the custom quiz.
             
             Args:
+                parent: Parent widget
                 total_questions: Number of questions in the quiz
+                show_visual_aid: Whether to show visual aids
                 show_questions_control: Whether to show the questions count control
             """
-            super().__init__(total_questions=total_questions)
+            super().__init__(
+                parent=parent,
+                total_questions=total_questions,
+                show_visual_aid=show_visual_aid,
+                show_questions_control=show_questions_control
+            )
             self.quiz_name = name
             
             # Add navigation bar
@@ -47,16 +54,16 @@ def create_custom_quiz(
             if show_questions_control:
                 self.questions_spinbox = self.nav_bar.add_questions_spinbox(
                     initial_value=total_questions,
-                    callback=self.update_total_questions
+                    callback=self.set_total_questions
                 )
             
             # Add visual aid if provided
             if visual_aid_class:
-                self.setup_visual_aid(visual_aid_class)
+                self.setup_visual_aid(visual_aid_class, show_visual_aid)
                 
-            self.layout.insertWidget(0, self.nav_bar)
+            self.main_layout.insertWidget(0, self.nav_bar)
         
-        def setup_visual_aid(self, visual_aid_class):
+        def setup_visual_aid(self, visual_aid_class, initial_visible=True):
             """Set up the visual aid for this quiz."""
             # Visual aid container setup
             self.visual_aid_container = QWidget()
@@ -67,7 +74,7 @@ def create_custom_quiz(
             
             # Add visual aid toggle checkbox
             self.show_visual_aid_checkbox = self.nav_bar.add_checkbox(
-                "Pokaż podpowiedź", True, self.toggle_visual_aid
+                "Pokaż podpowiedź", initial_visible, self.toggle_visual_aid
             )
             
             # Store the visual aid class for later use
@@ -88,11 +95,17 @@ def create_custom_quiz(
                 self.visual_aid_layout.addWidget(placeholder)
             
             # Add container to main layout
-            self.layout.insertWidget(1, self.visual_aid_container)
+            self.main_layout.insertWidget(1, self.visual_aid_container)
             
+            # Set initial visibility
+            self.toggle_visual_aid(initial_visible)
+        
         def toggle_visual_aid(self, state):
             """Toggle the visibility of the visual aid."""
-            show_visual_aid = self.show_visual_aid_checkbox.isChecked()
+            if not hasattr(self, 'visual_aid_container') or not hasattr(self, 'show_visual_aid_checkbox'):
+                return
+                
+            show_visual_aid = state if isinstance(state, bool) else self.show_visual_aid_checkbox.isChecked()
             
             # Show or hide the container
             self.visual_aid_container.setVisible(show_visual_aid)
@@ -106,8 +119,8 @@ def create_custom_quiz(
                 self.visual_aid_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
             
             # Force layout updates
-            self.layout.activate()
-            self.layout.update()
+            self.main_layout.activate()
+            self.main_layout.update()
             
             # Force layout updates to parent widgets
             if self.parent():
@@ -120,27 +133,30 @@ def create_custom_quiz(
         def on_new_question(self):
             """Update the visual aid when a new question is generated."""
             if hasattr(self, 'visual_aid') and hasattr(self, 'visual_aid_container') and hasattr(self, 'visual_aid_class'):
-                # Store current visibility state
-                was_visible = self.show_visual_aid_checkbox.isChecked()
-                
-                # Remove old visual aid
-                self.visual_aid.setParent(None)
-                self.visual_aid.deleteLater()
-                
-                # Create new visual aid with proper error handling
                 try:
-                    self.visual_aid = self.visual_aid_class(self.num1, self.num2)
-                    self.visual_aid_layout.addWidget(self.visual_aid)
+                    # Store current visibility state
+                    was_visible = self.show_visual_aid_checkbox.isChecked()
+                    
+                    # Remove old visual aid
+                    self.visual_aid.setParent(None)
+                    self.visual_aid.deleteLater()
+                    
+                    # Create new visual aid with proper error handling
+                    try:
+                        self.visual_aid = self.visual_aid_class(self.num1, self.num2)
+                        self.visual_aid_layout.addWidget(self.visual_aid)
+                    except Exception as e:
+                        print(f"Error creating visual aid: {e}")
+                        # Create an error message widget if visual aid creation fails
+                        error_widget = QLabel(f"Błąd pomocy wizualnej: {self.num1}, {self.num2}")
+                        error_widget.setAlignment(Qt.AlignCenter)
+                        self.visual_aid = error_widget
+                        self.visual_aid_layout.addWidget(error_widget)
+                    
+                    # Update visibility based on checkbox state
+                    self.toggle_visual_aid(was_visible)
                 except Exception as e:
-                    print(f"Error creating visual aid: {e}")
-                    # Create an error message widget if visual aid creation fails
-                    error_widget = QLabel(f"Błąd pomocy wizualnej: {self.num1}, {self.num2}")
-                    error_widget.setAlignment(Qt.AlignCenter)
-                    self.visual_aid = error_widget
-                    self.visual_aid_layout.addWidget(error_widget)
-                
-                # Update visibility based on checkbox state
-                self.toggle_visual_aid(was_visible)
+                    print(f"Error in on_new_question: {str(e)}")
         
         def generate_numbers(self):
             """Generate numbers for this quiz question."""
@@ -162,8 +178,12 @@ def create_custom_quiz(
             if question_formatter:
                 # Replace the question mark with the answer
                 question = question_formatter(self)
-                return question.replace("?", str(self.correct_answer))
+                return question.replace("?", str(self.expected_answer))
             # Default format if none provided
-            return f"{self.num1} ? {self.num2} = {self.correct_answer}"
+            return f"{self.num1} ? {self.num2} = {self.expected_answer}"
+            
+        def set_total_questions(self, value):
+            """Set the total number of questions in the quiz."""
+            self.total_questions = value
     
     return CustomQuiz 

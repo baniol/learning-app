@@ -8,14 +8,21 @@ from ..components import NavigationBar
 class MultiplicationQuiz(BaseQuiz):
     """Quiz for practicing multiplication problems."""
     
-    def __init__(self, total_questions=20, show_questions_control=True):
+    def __init__(self, parent=None, total_questions=20, show_visual_aid=True, show_questions_control=True):
         """Initialize the multiplication quiz.
         
         Args:
+            parent: Parent widget
             total_questions: Number of questions in the quiz
+            show_visual_aid: Whether to show visual aids
             show_questions_control: Whether to show the questions count control
         """
-        super().__init__(total_questions=total_questions)
+        super().__init__(
+            parent=parent,
+            total_questions=total_questions,
+            show_visual_aid=show_visual_aid,
+            show_questions_control=show_questions_control
+        )
         
         # Add navigation bar
         self.nav_bar = NavigationBar(self.return_to_menu)
@@ -30,10 +37,10 @@ class MultiplicationQuiz(BaseQuiz):
         if show_questions_control:
             self.questions_spinbox = self.nav_bar.add_questions_spinbox(
                 initial_value=total_questions,
-                callback=self.update_total_questions
+                callback=self.set_total_questions
             )
         
-        self.layout.insertWidget(0, self.nav_bar)
+        self.main_layout.insertWidget(0, self.nav_bar)
     
     def generate_numbers(self):
         """Generate numbers from 2 to 5 for multiplication, avoiding multiplying by 1."""
@@ -50,4 +57,8 @@ class MultiplicationQuiz(BaseQuiz):
 
     def format_question_with_answer(self):
         """Format the multiplication question with the answer."""
-        return f"{self.num1} × {self.num2} = {self.correct_answer}" 
+        return f"{self.num1} × {self.num2} = {self.expected_answer}"
+
+    def set_total_questions(self, value):
+        """Set the total number of questions in the quiz."""
+        self.total_questions = value 

@@ -26,6 +26,16 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
     
+    # Create users table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        display_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    ''')
+    
     # Create scores table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS scores (
@@ -37,6 +47,12 @@ def init_db():
         percentage REAL NOT NULL,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )
+    ''')
+    
+    # Insert default user if it doesn't exist
+    cursor.execute('''
+    INSERT OR IGNORE INTO users (username, display_name)
+    VALUES ('anonymous', 'Anonymous')
     ''')
     
     conn.commit()
