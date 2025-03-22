@@ -56,6 +56,20 @@ class QuizManager:
             return quiz_class(**kwargs)
         return None
     
+    def create_simple_quiz(self, name, quiz_class, **kwargs):
+        """Create and register a quiz in one simple step.
+        
+        Args:
+            name: The name to register the quiz with
+            quiz_class: The quiz class to register
+            **kwargs: Default arguments for the quiz when created
+            
+        Returns:
+            The registered quiz class
+        """
+        self.register_quiz(name, quiz_class)
+        return quiz_class
+    
     def get_all_quiz_names(self):
         """Get a list of all registered quiz names.
         

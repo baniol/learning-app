@@ -2,7 +2,6 @@
 Custom quizzes created using the factory function.
 """
 import random
-from ..components.visual_aid import VisualAidWidget, SubtractionVisualAidWidget
 
 # Import create_custom_quiz directly from base module's scope
 import sys
@@ -39,7 +38,6 @@ def create_small_multiplication_quiz(total_questions=15):
         number_generator=generate_numbers,
         answer_calculator=calculate_answer,
         question_formatter=format_question,
-        visual_aid_class=None,  # No visual aid for multiplication
         total_questions=total_questions
     )
 
@@ -65,7 +63,6 @@ def create_subtraction_quiz(total_questions=15):
         number_generator=generate_numbers,
         answer_calculator=calculate_answer,
         question_formatter=format_question,
-        visual_aid_class=None,  # No visual aid for subtraction
         total_questions=total_questions
     )
 

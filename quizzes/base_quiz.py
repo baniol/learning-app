@@ -34,13 +34,12 @@ class BaseQuiz(QWidget):
     types should inherit from this class and override the necessary methods.
     """
     
-    def __init__(self, parent=None, total_questions=DEFAULT_QUIZ_QUESTIONS, show_visual_aid=True, show_questions_control=True):
+    def __init__(self, parent=None, total_questions=DEFAULT_QUIZ_QUESTIONS, show_questions_control=True):
         """Initialize the quiz with basic UI components.
         
         Args:
             parent: Parent widget
             total_questions: The total number of questions to include in the quiz
-            show_visual_aid: Whether to show visual aids
             show_questions_control: Whether to show question control options
         """
         super().__init__(parent)
@@ -54,7 +53,6 @@ class BaseQuiz(QWidget):
         self.correct_answers: int = 0
         self.quiz_completed: bool = False
         self.input_mode: bool = False  # Default to button mode
-        self.show_visual_aid: bool = show_visual_aid
         self.show_questions_control: bool = show_questions_control
         self.player_name: str = "Anonymous"  # Default player name
         

@@ -8,19 +8,17 @@ from ..components import NavigationBar
 class MultiplicationQuiz(BaseQuiz):
     """Quiz for practicing multiplication problems."""
     
-    def __init__(self, parent=None, total_questions=20, show_visual_aid=True, show_questions_control=True):
+    def __init__(self, parent=None, total_questions=20, show_questions_control=True):
         """Initialize the multiplication quiz.
         
         Args:
             parent: Parent widget
             total_questions: Number of questions in the quiz
-            show_visual_aid: Whether to show visual aids
             show_questions_control: Whether to show the questions count control
         """
         super().__init__(
             parent=parent,
             total_questions=total_questions,
-            show_visual_aid=show_visual_aid,
             show_questions_control=show_questions_control
         )
         
@@ -60,5 +58,5 @@ class MultiplicationQuiz(BaseQuiz):
         return f"{self.num1} × {self.num2} = {self.expected_answer}"
 
     def set_total_questions(self, value):
-        """Set the total number of questions in the quiz."""
-        self.total_questions = value 
+        """Set the total number of questions."""
+        super().set_total_questions(value) 
